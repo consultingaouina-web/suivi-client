@@ -11,7 +11,7 @@ Un guide complet, pas à pas, est fourni séparément pour le déploiement sur R
 
 ```
 suivi-fiscal-social-cabinets/
-  server.js          serveur Express (API + fichiers statiques) — utilisé par Render et en local
+  coeur-serveur.js     serveur Express (API + fichiers statiques) — utilisé par Render et en local
   api/
     index.js            point d'entrée utilisé uniquement par Vercel (voir plus bas)
   vercel.json            configuration de routage pour Vercel
@@ -24,6 +24,8 @@ suivi-fiscal-social-cabinets/
   data/                 (créé automatiquement en mode local — un fichier JSON par collection)
 ```
 
+**Ne renommez jamais `coeur-serveur.js` en `server.js`, `index.js` ou `app.js`** (à la racine ou dans un dossier `src/`) : Vercel scanne automatiquement ces noms de fichiers pour une fonctionnalité "zero-config Express" qui essaierait alors de déployer ce fichier tel quel comme application — or il exporte une fabrique (`creerApp`), pas l'application elle-même, ce qui fait échouer le déploiement avec l'erreur *"Invalid export found in module... The default export must be a function or server."* (rencontrée et corrigée lors de la mise en place du support Vercel — voir plus bas). Le point d'entrée réellement utilisé par Vercel est `api/index.js`.
+
 ## Deux modes de stockage
 
 Le serveur choisit automatiquement où stocker les données, selon `.env` :
@@ -31,7 +33,7 @@ Le serveur choisit automatiquement où stocker les données, selon `.env` :
 - **Mode local (fichiers JSON)** — activé automatiquement si `MONGODB_URI` est vide. Idéal pour tester le MVP sans rien installer ni créer de compte cloud : chaque « collection » (`cabinets`, `comptes`, `etat`) devient un fichier JSON dans le dossier `data/`, créé automatiquement au premier lancement. Chaque création, modification ou suppression réécrit immédiatement le fichier JSON concerné sur le disque — les données survivent à un redémarrage du serveur, exactement comme une vraie base. Le dossier `data/` est exclu de Git (`.gitignore`) : ce sont des données de test locales, à ne jamais committer.
 - **Mode MongoDB Atlas (cloud)** — activé dès que `MONGODB_URI` est renseignée dans `.env`. C'est le mode à utiliser pour la mise en ligne réelle (voir le guide de déploiement). Vous pouvez forcer le mode fichiers même avec `MONGODB_URI` renseignée en ajoutant `DB_MODE=fichier` dans `.env` (pratique pour continuer à tester en local sans toucher à la vraie base).
 
-Le passage d'un mode à l'autre est purement une question de configuration (`.env`) — aucune ligne de code de `server.js` ne change, et le format des données stockées est identique dans les deux cas.
+Le passage d'un mode à l'autre est purement une question de configuration (`.env`) — aucune ligne de code de `coeur-serveur.js` ne change, et le format des données stockées est identique dans les deux cas.
 
 ## Variables d'environnement
 
@@ -52,7 +54,7 @@ Il n'y a pas de mot de passe unique d'application (`APP_PASSWORD`) : chaque pers
 cp .env.example .env
 # éditez .env : mettez seulement une chaîne SESSION_SECRET, laissez MONGODB_URI vide
 npm install
-npm start
+npm start   # lance coeur-serveur.js
 ```
 
 Puis ouvrez `http://localhost:3000` et créez votre premier cabinet depuis l'onglet « Créer un cabinet ». Toutes les données (cabinets, comptes, clients, etc.) sont enregistrées dans des fichiers JSON lisibles dans le dossier `data/` — vous pouvez les ouvrir avec n'importe quel éditeur de texte pour inspecter ce qui a été enregistré. Pour repartir de zéro, supprimez simplement le dossier `data/` et relancez le serveur.
@@ -63,11 +65,11 @@ Puis ouvrez `http://localhost:3000` et créez votre premier cabinet depuis l'ong
 
 ### Sur Render.com (guide détaillé fourni séparément)
 
-Voir le guide pas à pas fourni séparément : création du compte MongoDB Atlas (gratuit), mise en ligne du code, création du service sur Render.com, configuration des variables d'environnement. Render fait tourner `server.js` comme un serveur classique (`npm start`), en continu.
+Voir le guide pas à pas fourni séparément : création du compte MongoDB Atlas (gratuit), mise en ligne du code, création du service sur Render.com, configuration des variables d'environnement. Render fait tourner `coeur-serveur.js` comme un serveur classique (`npm start`), en continu.
 
 ### Sur Vercel
 
-Vercel ne fait pas tourner de serveur permanent : chaque requête est traitée par une fonction (`api/index.js`), potentiellement sur une instance qui vient de démarrer. `vercel.json` redirige toutes les routes (pages, fichiers de l'application, API) vers cette fonction unique, qui charge `server.js` et se connecte à MongoDB à la demande, en réutilisant la connexion tant que l'instance reste active.
+Vercel ne fait pas tourner de serveur permanent : chaque requête est traitée par une fonction (`api/index.js`), potentiellement sur une instance qui vient de démarrer. `vercel.json` redirige toutes les routes (pages, fichiers de l'application, API) vers cette fonction unique, qui charge `coeur-serveur.js` et se connecte à MongoDB à la demande, en réutilisant la connexion tant que l'instance reste active.
 
 Étapes :
 1. Déposez le code sur GitHub (comme pour Render, voir le guide).
@@ -76,6 +78,8 @@ Vercel ne fait pas tourner de serveur permanent : chaque requête est traitée p
 4. Déployez. Aucune configuration de build n'est nécessaire (pas de framework, pas d'étape de compilation).
 
 **Important — obligatoire sur Vercel : `MONGODB_URI` doit toujours être renseignée.** Le mode fichiers JSON (voir ci-dessous) ne fonctionne pas sur Vercel : le système de fichiers d'une fonction serverless n'est ni partagé entre les instances, ni conservé d'une requête à l'autre (confirmé par la documentation officielle de Vercel, qui recommande un stockage externe pour tout ce qui doit persister). Ce mode reste utilisable uniquement pour tester en local sur votre PC avant de déployer.
+
+**Piège connu (déjà rencontré et corrigé dans cette livraison)** : Vercel scanne automatiquement les fichiers `server.js` / `index.js` / `app.js` à la racine (ou dans `src/`) pour une fonctionnalité "zero-config Express", indépendamment de `api/index.js` et de `vercel.json`. C'est pour cette raison que le serveur partagé s'appelle `coeur-serveur.js` et non `server.js` — avec ce dernier nom, Vercel tentait de le déployer directement et échouait avec *"Invalid export found in module... The default export must be a function or server."*, car ce fichier exporte une fabrique (`creerApp`) et non l'application elle-même. Ne renommez pas `coeur-serveur.js` vers l'un de ces noms sans adapter `api/index.js` en conséquence.
 
 **Limite propre à Vercel** : la protection anti-force-brute sur la connexion (compteur de tentatives) est gardée en mémoire de la fonction — chaque instance serverless a sa propre mémoire, donc cette limite est appliquée par instance plutôt que globalement (contrairement à Render, où un seul processus tourne en continu). Sans conséquence pour un usage normal, mais un attaquant déterminé pourrait en théorie répartir ses tentatives sur plusieurs instances pour contourner partiellement la limite.
 

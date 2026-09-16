@@ -5,10 +5,21 @@
    Vercel ne fait pas tourner un serveur permanent : chaque requête est
    traitée par une fonction, potentiellement sur une instance "froide"
    qui vient de démarrer. On ne peut donc pas se connecter à MongoDB une
-   fois pour toutes comme dans server.js (bloc `app.listen`) — il faut
-   se connecter à la demande, puis RÉUTILISER cette connexion tant que
-   l'instance reste "chaude" (c'est ce que fait `promesseApp` ci-dessous,
-   mise en cache au niveau du module).
+   fois pour toutes comme dans coeur-serveur.js (bloc `app.listen`) — il
+   faut se connecter à la demande, puis RÉUTILISER cette connexion tant
+   que l'instance reste "chaude" (c'est ce que fait `promesseApp`
+   ci-dessous, mise en cache au niveau du module).
+
+   IMPORTANT — pourquoi le fichier partagé s'appelle "coeur-serveur.js"
+   et non "server.js" : Vercel scanne automatiquement app.js / index.js /
+   server.js (à la racine ou dans src/) et essaie de les déployer TELS
+   QUELS comme application Express (fonctionnalité "zero-config Express"),
+   indépendamment de ce fichier api/index.js et de vercel.json. Comme
+   coeur-serveur.js exporte une fabrique (`creerApp`) et non l'application
+   elle-même, Vercel refusait le déploiement avec l'erreur "Invalid export
+   found... The default export must be a function or server." Ne renommez
+   donc jamais coeur-serveur.js en app.js / index.js / server.js (à la
+   racine ou dans src/) sans adapter aussi ce fichier en conséquence.
 
    Le mode "fichiers JSON" (db-fichier.js) n'est PAS utilisable ici : le
    système de fichiers d'une fonction Vercel n'est ni partagé entre les
@@ -17,7 +28,7 @@
    où elle peut être laissée vide) — voir README.md.
    ========================================================= */
 const { MongoClient } = require('mongodb');
-const { creerApp } = require('../server.js');
+const { creerApp } = require('../coeur-serveur.js');
 
 let promesseApp = null;
 
