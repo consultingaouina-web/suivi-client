@@ -5,13 +5,16 @@ Version hébergée sur internet de l'application, où **plusieurs cabinets compt
 - **Superviseur** : voit et gère tout (tous les clients, tous les modules, l'équipe, les paramètres).
 - **Agent** : ne voit que les clients qui lui sont attachés (et le suivi fiscal/social, les notes et les tâches qui s'y rapportent). Les comptes agents sont créés par le superviseur depuis le module Collaborateurs.
 
-Un guide complet, pas à pas, est fourni séparément pour le déploiement sur Render.com + MongoDB Atlas. Ce README est un résumé technique.
+Un guide complet, pas à pas, est fourni séparément pour le déploiement sur Render.com + MongoDB Atlas. Ce README est un résumé technique. Un déploiement sur **Vercel** est également possible (voir plus bas) — même base de code, un seul petit fichier d'entrée en plus.
 
 ## Structure du projet
 
 ```
 suivi-fiscal-social-cabinets/
-  server.js          serveur Express (API + fichiers statiques)
+  server.js          serveur Express (API + fichiers statiques) — utilisé par Render et en local
+  api/
+    index.js            point d'entrée utilisé uniquement par Vercel (voir plus bas)
+  vercel.json            configuration de routage pour Vercel
   db-fichier.js        base de données simulée en fichiers JSON (mode local, voir plus bas)
   package.json        dépendances Node.js
   .env.example         modèle des variables d'environnement (à copier en .env pour tester en local)
@@ -58,7 +61,25 @@ Puis ouvrez `http://localhost:3000` et créez votre premier cabinet depuis l'ong
 
 ## Déploiement
 
-Voir le guide pas à pas fourni séparément : création du compte MongoDB Atlas (gratuit), mise en ligne du code, création du service sur Render.com, configuration des variables d'environnement. En production, `MONGODB_URI` doit être renseignée (le mode fichiers JSON n'a pas vocation à être utilisé en ligne : sur Render, le disque n'est pas conservé entre deux redémarrages).
+### Sur Render.com (guide détaillé fourni séparément)
+
+Voir le guide pas à pas fourni séparément : création du compte MongoDB Atlas (gratuit), mise en ligne du code, création du service sur Render.com, configuration des variables d'environnement. Render fait tourner `server.js` comme un serveur classique (`npm start`), en continu.
+
+### Sur Vercel
+
+Vercel ne fait pas tourner de serveur permanent : chaque requête est traitée par une fonction (`api/index.js`), potentiellement sur une instance qui vient de démarrer. `vercel.json` redirige toutes les routes (pages, fichiers de l'application, API) vers cette fonction unique, qui charge `server.js` et se connecte à MongoDB à la demande, en réutilisant la connexion tant que l'instance reste active.
+
+Étapes :
+1. Déposez le code sur GitHub (comme pour Render, voir le guide).
+2. Sur [vercel.com](https://vercel.com), **Add New → Project**, importez le dépôt.
+3. Dans les réglages du projet, section **Environment Variables**, ajoutez `SESSION_SECRET` et `MONGODB_URI` (mêmes valeurs que pour Render — voir le guide pour créer le cluster MongoDB Atlas gratuit).
+4. Déployez. Aucune configuration de build n'est nécessaire (pas de framework, pas d'étape de compilation).
+
+**Important — obligatoire sur Vercel : `MONGODB_URI` doit toujours être renseignée.** Le mode fichiers JSON (voir ci-dessous) ne fonctionne pas sur Vercel : le système de fichiers d'une fonction serverless n'est ni partagé entre les instances, ni conservé d'une requête à l'autre (confirmé par la documentation officielle de Vercel, qui recommande un stockage externe pour tout ce qui doit persister). Ce mode reste utilisable uniquement pour tester en local sur votre PC avant de déployer.
+
+**Limite propre à Vercel** : la protection anti-force-brute sur la connexion (compteur de tentatives) est gardée en mémoire de la fonction — chaque instance serverless a sa propre mémoire, donc cette limite est appliquée par instance plutôt que globalement (contrairement à Render, où un seul processus tourne en continu). Sans conséquence pour un usage normal, mais un attaquant déterminé pourrait en théorie répartir ses tentatives sur plusieurs instances pour contourner partiellement la limite.
+
+En production (Render ou Vercel), `MONGODB_URI` doit toujours être renseignée — le mode fichiers JSON n'a pas vocation à être utilisé en ligne.
 
 ## Fonctionnement
 
