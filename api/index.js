@@ -10,16 +10,21 @@
    que l'instance reste "chaude" (c'est ce que fait `promesseApp`
    ci-dessous, mise en cache au niveau du module).
 
-   IMPORTANT — pourquoi le fichier partagé s'appelle "coeur-serveur.js"
-   et non "server.js" : Vercel scanne automatiquement app.js / index.js /
-   server.js (à la racine ou dans src/) et essaie de les déployer TELS
-   QUELS comme application Express (fonctionnalité "zero-config Express"),
-   indépendamment de ce fichier api/index.js et de vercel.json. Comme
-   coeur-serveur.js exporte une fabrique (`creerApp`) et non l'application
+   IMPORTANT — pourquoi le fichier partagé vit dans lib/coeur-serveur.js
+   et non à la racine sous server.js : Vercel scanne automatiquement des
+   fichiers Express à la racine du projet (et a tenté, lors des premiers
+   essais de déploiement, de déployer TEL QUEL un fichier nommé
+   "server.js" puis même "coeur-serveur.js" à la racine — malgré la
+   documentation officielle qui ne mentionne que app.js/index.js/
+   server.js comme noms scannés) et essaie de le déployer comme
+   l'application elle-même (fonctionnalité "zero-config Express"),
+   indépendamment de ce fichier api/index.js et de vercel.json. Comme ce
+   fichier exporte une fabrique (`creerApp`) et non l'application
    elle-même, Vercel refusait le déploiement avec l'erreur "Invalid export
-   found... The default export must be a function or server." Ne renommez
-   donc jamais coeur-serveur.js en app.js / index.js / server.js (à la
-   racine ou dans src/) sans adapter aussi ce fichier en conséquence.
+   found... The default export must be a function or server." Le déplacer
+   dans un sous-dossier (lib/) l'exclut de ce scan automatique. Ne
+   replacez donc jamais ce fichier à la racine du projet (ni dans src/)
+   sans vérifier que cela ne réintroduit pas le même problème.
 
    Le mode "fichiers JSON" (db-fichier.js) n'est PAS utilisable ici : le
    système de fichiers d'une fonction Vercel n'est ni partagé entre les
@@ -28,7 +33,7 @@
    où elle peut être laissée vide) — voir README.md.
    ========================================================= */
 const { MongoClient } = require('mongodb');
-const { creerApp } = require('../coeur-serveur.js');
+const { creerApp } = require('../lib/coeur-serveur.js');
 
 let promesseApp = null;
 

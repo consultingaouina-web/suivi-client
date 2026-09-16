@@ -2,9 +2,8 @@
   "name": "suivi-fiscal-social-cabinets",
   "version": "1.0.0",
   "private": true,
-  "main": "coeur-serveur.js",
   "scripts": {
-    "start": "node coeur-serveur.js"
+    "start": "node lib/coeur-serveur.js"
   },
   "engines": { "node": ">=18" },
   "dependencies": {
