@@ -1,0 +1,2624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Fiscal &amp; Social — Multi-cabinets</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%232563eb'/%3E%3Cpath d='M7 15h3v3H7zM10.5 10h3v8h-3zM14 6h3v12h-3z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bleu-fonce:#1e293b;
+  --bleu-fonce-2:#273449;
+  --bleu-accent:#2563eb;
+  --bleu-accent-clair:#eef2ff;
+  --bleu-accent-bordure:#c7d2fe;
+  --vert:#16a34a;
+  --vert-bg:#dcfce7;
+  --vert-bordure:#86efac;
+  --rouge:#dc2626;
+  --rouge-bg:#fee2e2;
+  --rouge-bordure:#fca5a5;
+  --gris-bg:#f8fafc;
+  --gris-bordure:#e2e8f0;
+  --gris-texte:#64748b;
+  --texte:#0f172a;
+  --blanc:#ffffff;
+  --ombre:0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.06);
+  --ombre-lg:0 10px 25px rgba(15,23,42,0.12), 0 4px 10px rgba(15,23,42,0.08);
+  --rayon:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--gris-bg);
+  color:var(--texte);
+  display:flex;
+  min-height:100vh;
+}
+::-webkit-scrollbar{height:10px;width:10px;}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ---------- Sidebar ---------- */
+#sidebar{
+  width:250px;
+  min-width:250px;
+  background:var(--bleu-fonce);
+  color:#e2e8f0;
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  position:sticky;
+  top:0;
+}
+.sidebar-titre{
+  padding:22px 20px 16px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
+.sidebar-titre .logo-icone{
+  width:34px;height:34px;flex:0 0 auto;
+  background:var(--bleu-accent);
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+}
+.sidebar-titre .logo-icone svg{width:19px;height:19px;stroke:#fff;}
+.sidebar-titre .logo-texte{line-height:1.25;}
+.sidebar-titre .logo-texte b{display:block;font-size:14.5px;color:#fff;}
+.sidebar-titre .logo-texte span{display:block;font-size:11.5px;color:#94a3b8;}
+
+nav.nav-principale{flex:1;padding:14px 12px;overflow-y:auto;}
+.nav-section-label{
+  font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:#64748b;padding:14px 10px 6px;font-weight:600;
+}
+.nav-item{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 12px;border-radius:8px;cursor:pointer;
+  color:#cbd5e1;font-size:14px;font-weight:500;
+  margin-bottom:2px;
+  user-select:none;
+  transition:background .12s;
+}
+.nav-item svg{width:17px;height:17px;stroke:currentColor;flex:0 0 auto;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+.nav-item.actif{background:var(--bleu-accent);color:#fff;}
+
+#sidebar-bas{padding:12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:6px;}
+.btn-sidebar{
+  display:flex;align-items:center;gap:9px;
+  padding:9px 11px;border-radius:8px;cursor:pointer;
+  color:#cbd5e1;font-size:13px;background:transparent;border:1px solid rgba(255,255,255,0.12);
+}
+.btn-sidebar:hover{background:rgba(255,255,255,0.07);color:#fff;}
+.btn-sidebar svg{width:15px;height:15px;stroke:currentColor;}
+#input-import{display:none;}
+
+/* ---------- Contenu principal ---------- */
+#contenu{flex:1;min-width:0;padding:28px 34px 60px;}
+.page-header-titre{margin-bottom:22px;}
+h1.titre-avec-icone{
+  display:flex;align-items:center;gap:12px;
+  font-size:22px;margin:0 0 4px;
+}
+h1.titre-avec-icone .icone-titre{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--bleu-accent-clair);
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;
+}
+h1.titre-avec-icone .icone-titre svg{width:19px;height:19px;stroke:var(--bleu-accent);}
+.compteur-titre{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:600;color:#4338ca;
+  background:linear-gradient(135deg,#eef2ff,#e0e7ff);
+  border:1px solid var(--bleu-accent-bordure);
+  padding:3px 11px 3px 9px;border-radius:999px;
+  box-shadow:0 1px 2px rgba(67,56,202,0.08);
+}
+.compteur-titre .point{width:6px;height:6px;border-radius:50%;background:#4338ca;}
+p.sous-titre{color:var(--gris-texte);font-size:13.5px;margin:2px 0 0;}
+
+.stats-mini-row{display:flex;gap:12px;margin:14px 0 20px;flex-wrap:wrap;}
+.stat-mini-box{
+  background:var(--blanc);border:1px solid var(--gris-bordure);border-radius:var(--rayon);
+  padding:11px 18px;box-shadow:var(--ombre);min-width:150px;
+}
+.stat-mini-box .label{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--gris-texte);font-weight:600;}
+.stat-mini-box .valeur{font-size:20px;font-weight:700;margin-top:2px;}
+.stat-mini-box.vert .valeur{color:var(--vert);}
+.stat-mini-box.rouge .valeur{color:var(--rouge);}
+.stat-mini-box.bleu .valeur{color:var(--bleu-accent);}
+
+.panneau{
+  background:var(--blanc);border:1px solid var(--gris-bordure);border-radius:var(--rayon);
+  box-shadow:var(--ombre);padding:18px 20px;margin-bottom:20px;
+}
+.barre-actions-clients{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;
+}
+.page-header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;}
+
+.filtres{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+.champ-filtre{display:flex;flex-direction:column;gap:4px;}
+.champ-filtre label{font-size:11px;color:var(--gris-texte);font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+.champ-filtre input,.champ-filtre select{
+  padding:8px 10px;border:1px solid var(--gris-bordure);border-radius:7px;font-size:13.5px;
+  min-width:170px;background:var(--blanc);color:var(--texte);
+}
+.champ-filtre input:focus,.champ-filtre select:focus{outline:2px solid var(--bleu-accent-bordure);border-color:var(--bleu-accent);}
+
+.champ-annee{display:flex;align-items:center;gap:8px;}
+.champ-annee button{
+  width:30px;height:30px;border-radius:7px;border:1px solid var(--gris-bordure);
+  background:var(--blanc);cursor:pointer;font-size:15px;font-weight:600;color:var(--bleu-accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.champ-annee button:hover{background:var(--bleu-accent-clair);}
+.champ-annee .valeur-annee{
+  font-size:16px;font-weight:700;min-width:56px;text-align:center;
+  padding:6px 4px;border:1px solid var(--gris-bordure);border-radius:7px;background:var(--gris-bg);
+}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:9px 16px;border-radius:8px;border:none;cursor:pointer;
+  font-size:13.5px;font-weight:600;
+}
+.btn svg{width:15px;height:15px;stroke:currentColor;}
+.btn-primaire{background:var(--bleu-accent);color:#fff;}
+.btn-primaire:hover{background:#1d4ed8;}
+.btn-secondaire{background:var(--blanc);color:var(--texte);border:1px solid var(--gris-bordure);}
+.btn-secondaire:hover{background:var(--gris-bg);}
+.btn-danger{background:var(--rouge);color:#fff;}
+.btn-danger:hover{background:#b91c1c;}
+.btn-petit{padding:6px 11px;font-size:12.5px;}
+
+.btn-icone{
+  width:31px;height:31px;border-radius:7px;border:1px solid var(--gris-bordure);background:var(--blanc);
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--gris-texte);
+}
+.btn-icone svg{width:15px;height:15px;stroke:currentColor;}
+.btn-icone:hover{background:var(--gris-bg);color:var(--texte);}
+.btn-icone.danger:hover{background:var(--rouge-bg);color:var(--rouge);border-color:var(--rouge-bordure);}
+
+.table-wrap{overflow-x:auto;border-radius:var(--rayon);border:1px solid var(--gris-bordure);}
+table{border-collapse:collapse;width:100%;font-size:13.5px;background:var(--blanc);}
+thead th{
+  background:#f1f5f9;color:#334155;font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;
+  padding:10px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--gris-bordure);
+  position:sticky;top:0;z-index:2;
+}
+tbody td{padding:9px 12px;border-bottom:1px solid #f1f5f9;white-space:nowrap;}
+tbody tr:hover{background:#fafbfc;}
+tbody tr:last-child td{border-bottom:none;}
+td.col-sticky,th.col-sticky{position:sticky;left:0;background:var(--blanc);z-index:1;box-shadow:2px 0 4px rgba(15,23,42,0.04);}
+thead th.col-sticky{background:#f1f5f9;z-index:3;}
+.nom-client-cell b{display:block;font-size:13.5px;}
+.nom-client-cell span{display:block;font-size:11px;color:var(--gris-texte);margin-top:1px;}
+
+td.cellule-toggle{padding:5px;text-align:center;cursor:pointer;}
+.puce-toggle{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:26px;border-radius:6px;font-size:11px;font-weight:700;
+  transition:transform .08s;
+}
+td.cellule-toggle:hover .puce-toggle{transform:scale(1.08);}
+.puce-toggle.vert{background:var(--vert-bg);color:#166534;border:1px solid var(--vert-bordure);}
+.puce-toggle.rouge{background:var(--rouge-bg);color:#991b1b;border:1px solid var(--rouge-bordure);}
+.puce-toggle.na{background:#f1f5f9;color:#94a3b8;border:1px solid #e2e8f0;cursor:not-allowed;}
+td.cellule-toggle.na{cursor:not-allowed;}
+.badge-neutre{
+  display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600;
+  background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;
+}
+
+.legende{display:flex;gap:18px;align-items:center;margin-top:12px;font-size:12px;color:var(--gris-texte);flex-wrap:wrap;}
+.legende .item-legende{display:flex;align-items:center;gap:6px;}
+.legende .pastille{width:13px;height:13px;border-radius:4px;display:inline-block;}
+.legende .pastille.vert{background:var(--vert-bg);border:1px solid var(--vert-bordure);}
+.legende .pastille.rouge{background:var(--rouge-bg);border:1px solid var(--rouge-bordure);}
+.legende .pastille.na{background:#f1f5f9;border:1px solid #e2e8f0;}
+
+.etat-vide{padding:40px 20px;text-align:center;color:var(--gris-texte);}
+.etat-vide svg{width:38px;height:38px;stroke:#cbd5e1;margin-bottom:10px;}
+
+/* Interrupteur (actif/inactif) */
+.interrupteur{
+  width:38px;height:22px;border-radius:999px;border:none;background:#cbd5e1;position:relative;cursor:pointer;
+  flex:0 0 auto;transition:background .15s;
+}
+.interrupteur .curseur{
+  position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 2px rgba(15,23,42,0.25);transition:transform .15s;
+}
+.interrupteur.actif{background:var(--vert);}
+.interrupteur.actif .curseur{transform:translateX(16px);}
+
+/* Avatars */
+.avatar-cercle{
+  width:34px;height:34px;border-radius:50%;object-fit:cover;background:#e2e8f0;
+  display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+}
+.avatar-initiales{background:var(--bleu-accent-clair);color:#4338ca;font-size:12px;font-weight:700;}
+.avatar-cercle-lg{width:76px;height:76px;font-size:20px;}
+
+/* Badges poste / statut tâche */
+.badge-poste{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;}
+.badge-poste-agent{background:#e0f2fe;color:#075985;border:1px solid #bae6fd;}
+.badge-poste-superviseur{background:#ede9fe;color:#5b21b6;border:1px solid #ddd6fe;}
+
+.badge-statut{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+.statut-avenir{background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;}
+.statut-attente{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.statut-termine{background:var(--vert-bg);color:#166534;border:1px solid var(--vert-bordure);}
+.statut-retard{background:var(--rouge-bg);color:#991b1b;border:1px solid var(--rouge-bordure);}
+
+/* Upload photo */
+.zone-photo{display:flex;align-items:center;gap:16px;}
+.zone-photo-apercu{
+  width:76px;height:76px;border-radius:50%;background:var(--gris-bg);border:1px dashed var(--gris-bordure);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;color:#94a3b8;
+}
+.zone-photo-apercu img{width:100%;height:100%;object-fit:cover;}
+.zone-photo-apercu svg{width:26px;height:26px;stroke:currentColor;}
+.zone-photo-actions{display:flex;flex-direction:column;gap:8px;}
+.zone-photo-actions input[type=file]{font-size:12.5px;}
+
+/* sous-onglets */
+.sous-onglets{display:flex;gap:4px;margin-bottom:18px;border-bottom:1px solid var(--gris-bordure);}
+.sous-onglet{
+  padding:10px 16px;font-size:13.5px;font-weight:600;color:var(--gris-texte);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.sous-onglet:hover{color:var(--texte);}
+.sous-onglet.actif{color:var(--bleu-accent);border-bottom-color:var(--bleu-accent);}
+
+/* ---------- Modales ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(15,23,42,0.45);
+  display:flex;align-items:center;justify-content:center;z-index:100;
+  padding:20px;
+}
+.modale{
+  background:var(--blanc);border-radius:14px;box-shadow:var(--ombre-lg);
+  width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;
+}
+.modale.modale-petite{max-width:420px;}
+.modale-entete{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;border-bottom:1px solid var(--gris-bordure);
+}
+.modale-entete h2{font-size:16.5px;margin:0;}
+.modale-fermer{
+  width:30px;height:30px;border-radius:7px;border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--gris-texte);
+}
+.modale-fermer:hover{background:var(--gris-bg);color:var(--texte);}
+.modale-fermer svg{width:16px;height:16px;stroke:currentColor;}
+.modale-corps{padding:20px 22px;overflow-y:auto;}
+.modale-pied{padding:16px 22px;border-top:1px solid var(--gris-bordure);display:flex;justify-content:flex-end;gap:10px;}
+
+.grille-form{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+.champ-form{display:flex;flex-direction:column;gap:5px;}
+.champ-form.pleine-largeur{grid-column:1/-1;}
+.champ-form label{font-size:12.5px;font-weight:600;color:#334155;}
+.champ-form label .req{color:var(--rouge);}
+.champ-form input,.champ-form select,.champ-form textarea{
+  width:100%;padding:9px 11px;border:1px solid var(--gris-bordure);border-radius:7px;font-size:13.5px;font-family:inherit;
+  background:var(--blanc);color:var(--texte);
+}
+.champ-form input:focus,.champ-form select:focus,.champ-form textarea:focus{outline:2px solid var(--bleu-accent-bordure);border-color:var(--bleu-accent);}
+.grille-checkboxes{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;}
+.checkbox-item{display:flex;align-items:center;gap:8px;font-size:13px;color:#334155;cursor:pointer;user-select:none;}
+.checkbox-item input[type=checkbox]{width:auto;margin:0;cursor:pointer;accent-color:var(--bleu-accent);}
+@media (max-width:900px){.grille-checkboxes{grid-template-columns:1fr;}}
+.valeur-fiche{
+  padding:9px 11px;border:1px solid var(--gris-bordure);border-radius:7px;font-size:13.5px;
+  background:var(--gris-bg);color:var(--texte);min-height:19px;
+}
+.valeur-fiche-vide{color:#94a3b8;}
+.champ-mdp{position:relative;}
+.champ-mdp .valeur-fiche{padding-right:38px;}
+.champ-mdp button{
+  position:absolute;right:6px;top:6px;width:26px;height:26px;border:none;background:transparent;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--gris-texte);
+}
+.champ-mdp button svg{width:15px;height:15px;stroke:currentColor;}
+
+.section-form-titre{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--gris-texte);
+  grid-column:1/-1;margin-top:6px;padding-top:12px;border-top:1px solid var(--gris-bordure);}
+.section-form-titre:first-child{border-top:none;margin-top:0;padding-top:0;}
+
+/* Paramètres */
+.grille-parametres{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.carte-parametre{background:var(--blanc);border:1px solid var(--gris-bordure);border-radius:var(--rayon);padding:16px 18px;box-shadow:var(--ombre);}
+.carte-parametre h3{font-size:14px;margin:0 0 12px;display:flex;align-items:center;gap:8px;}
+.liste-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.tag{
+  display:flex;align-items:center;gap:7px;background:#f1f5f9;border:1px solid var(--gris-bordure);
+  border-radius:999px;padding:5px 6px 5px 12px;font-size:12.5px;font-weight:500;
+}
+.tag button{width:18px;height:18px;border:none;background:transparent;cursor:pointer;color:var(--gris-texte);
+  display:flex;align-items:center;justify-content:center;border-radius:50%;}
+.tag button:hover{background:var(--rouge-bg);color:var(--rouge);}
+.tag select{border:none;background:transparent;font-size:11.5px;color:var(--gris-texte);font-weight:600;cursor:pointer;}
+.form-ajout-tag{display:flex;gap:8px;}
+.form-ajout-tag input,.form-ajout-tag select{flex:1;padding:7px 9px;border:1px solid var(--gris-bordure);border-radius:7px;font-size:13px;}
+.form-ajout-tag button{white-space:nowrap;}
+
+/* Toasts */
+#toasts{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:10px;z-index:200;}
+.toast{
+  background:var(--bleu-fonce);color:#fff;padding:12px 18px;border-radius:9px;box-shadow:var(--ombre-lg);
+  font-size:13.5px;display:flex;align-items:center;gap:10px;min-width:220px;
+  animation:toast-in .18s ease-out;
+}
+.toast.succes{background:#166534;}
+.toast.erreur{background:#991b1b;}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+@media (max-width:900px){
+  .grille-form{grid-template-columns:1fr;}
+  .grille-parametres{grid-template-columns:1fr;}
+}
+
+/* ---------- Écran de connexion / inscription ---------- */
+#ecran-connexion{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:var(--gris-bg);padding:24px;z-index:500;
+}
+.carte-connexion{
+  background:var(--blanc);border:1px solid var(--gris-bordure);border-radius:16px;box-shadow:var(--ombre-lg);
+  padding:32px 30px;width:100%;max-width:400px;
+}
+.carte-connexion .logo-icone{
+  width:44px;height:44px;border-radius:11px;background:var(--bleu-accent);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+}
+.carte-connexion .logo-icone svg{width:23px;height:23px;stroke:#fff;}
+.carte-connexion h1{font-size:19px;text-align:center;margin:0 0 4px;}
+.carte-connexion .sous-titre{text-align:center;margin:0 0 22px;}
+.onglets-auth{display:flex;gap:4px;border-bottom:1px solid var(--gris-bordure);margin-bottom:18px;}
+.onglet-auth{
+  flex:1;text-align:center;padding:9px 6px;font-size:13px;font-weight:600;color:var(--gris-texte);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+}
+.onglet-auth.actif{color:var(--bleu-accent);border-bottom-color:var(--bleu-accent);}
+.form-auth{display:flex;flex-direction:column;gap:13px;}
+.form-auth label{font-size:12.5px;font-weight:600;color:#334155;margin-bottom:4px;display:block;}
+.form-auth input{
+  width:100%;padding:10px 11px;border:1px solid var(--gris-bordure);border-radius:8px;font-size:13.5px;font-family:inherit;
+}
+.form-auth input:focus{outline:2px solid var(--bleu-accent-bordure);border-color:var(--bleu-accent);}
+.erreur-connexion{color:var(--rouge);font-size:12.5px;min-height:16px;margin-top:-4px;}
+.form-auth .btn{width:100%;justify-content:center;margin-top:4px;}
+#app-shell{display:none;width:100%;}
+#app-shell.visible{display:flex;}
+
+/* ---------- Bloc utilisateur (bas de sidebar) ---------- */
+.bloc-utilisateur{
+  display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:8px;
+  background:rgba(255,255,255,0.05);margin-bottom:8px;
+}
+.bloc-utilisateur .avatar-cercle{width:30px;height:30px;font-size:11px;}
+.bloc-utilisateur-texte{line-height:1.3;min-width:0;}
+.bloc-utilisateur-texte b{display:block;font-size:12.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bloc-utilisateur-texte span{display:block;font-size:10.5px;color:#94a3b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.champ-compte-agent{background:var(--bleu-accent-clair);border:1px solid var(--bleu-accent-bordure);border-radius:9px;padding:12px 14px;margin-top:4px;}
+.champ-compte-agent h4{margin:0 0 10px;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em;color:#4338ca;}
+</style>
+</head>
+<body>
+
+<div id="ecran-connexion">
+  <div class="carte-connexion">
+    <div class="logo-icone" id="logo-icone-connexion"></div>
+    <h1>Suivi Fiscal &amp; Social</h1>
+    <p class="sous-titre" style="margin-bottom:18px;">Plateforme multi-cabinets — chaque cabinet dispose de son propre espace.</p>
+
+    <div class="onglets-auth">
+      <div class="onglet-auth actif" data-onglet-auth="connexion">Se connecter</div>
+      <div class="onglet-auth" data-onglet-auth="inscription">Créer un cabinet</div>
+    </div>
+
+    <form id="form-connexion" class="form-auth">
+      <div>
+        <label for="c-email">Adresse email</label>
+        <input type="email" id="c-email" autocomplete="username" required>
+      </div>
+      <div>
+        <label for="c-mdp">Mot de passe</label>
+        <input type="password" id="c-mdp" autocomplete="current-password" required>
+      </div>
+      <div class="erreur-connexion" id="erreur-connexion"></div>
+      <button type="submit" class="btn btn-primaire" id="btn-connexion">Se connecter</button>
+    </form>
+
+    <form id="form-inscription" class="form-auth" style="display:none;">
+      <div>
+        <label for="i-cabinet">Nom du cabinet</label>
+        <input type="text" id="i-cabinet" required>
+      </div>
+      <div>
+        <label for="i-nom">Votre nom et prénom</label>
+        <input type="text" id="i-nom" required>
+      </div>
+      <div>
+        <label for="i-email">Adresse email</label>
+        <input type="email" id="i-email" autocomplete="username" required>
+      </div>
+      <div>
+        <label for="i-mdp">Mot de passe (6 caractères min.)</label>
+        <input type="password" id="i-mdp" autocomplete="new-password" required minlength="6">
+      </div>
+      <div class="erreur-connexion" id="erreur-inscription"></div>
+      <button type="submit" class="btn btn-primaire" id="btn-inscription">Créer mon cabinet</button>
+    </form>
+  </div>
+</div>
+
+<div id="app-shell">
+  <aside id="sidebar">
+    <div class="sidebar-titre">
+      <div class="logo-icone" id="logo-icone-slot"></div>
+      <div class="logo-texte">
+        <b id="nom-cabinet-sidebar">—</b>
+        <span>Suivi Fiscal &amp; Social</span>
+      </div>
+    </div>
+    <nav class="nav-principale" id="nav-principale"></nav>
+    <div id="sidebar-bas">
+      <div class="bloc-utilisateur">
+        <div class="avatar-cercle avatar-initiales" id="avatar-utilisateur">?</div>
+        <div class="bloc-utilisateur-texte">
+          <b id="nom-utilisateur">—</b>
+          <span id="role-utilisateur">—</span>
+        </div>
+      </div>
+      <button class="btn-sidebar" id="btn-deconnexion">
+        <span class="icn-slot" data-icon="deconnexion"></span> Déconnexion
+      </button>
+      <button class="btn-sidebar" id="btn-export">
+        <span class="icn-slot" data-icon="export"></span> Exporter les données
+      </button>
+      <button class="btn-sidebar" id="btn-import">
+        <span class="icn-slot" data-icon="import"></span> Importer les données
+      </button>
+      <input type="file" id="input-import" accept="application/json">
+    </div>
+  </aside>
+
+  <main id="contenu"></main>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   ICONES SVG (inline, aucune dépendance externe)
+   ========================================================= */
+const Icons = {
+  clients: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  fiscal: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+  social: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  parametres: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+  delete: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
+  export: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>',
+  import: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.3 20.3 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.3 20.3 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 1 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+  empty: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M8 16h5M8 8h3"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  collaborateurs: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="12" cy="10" r="3"/><path d="M7 17c.7-2 2.6-3 5-3s4.3 1 5 3"/></svg>',
+  camera: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  notes: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6M9 9h1"/></svg>',
+  cadenas: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  deconnexion: '<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>'
+};
+function svg(name){ return Icons[name] || ''; }
+
+/* =========================================================
+   STOCKAGE (serveur + MongoDB, auto-enregistrement, export/import JSON)
+   ========================================================= */
+const ANNEE_COURANTE = new Date().getFullYear();
+
+function donneesParDefaut(){
+  return {
+    version:2,
+    clients:[],
+    collaborateurs:[],  // [{id, nom, telephone, email, poste:'Agent'|'Superviseur', photo:dataURL|'', actif:bool}]
+    taches:[],          // [{id, collaborateurId, titre, description, dureeJours, dateDebut, dateFin, termine:bool}]
+    notes:[],           // [{id, clientId, texte}]
+    fiscalMensuel:{},   // { [annee]: { [clientId]: {m1..m12:bool} } }
+    fiscalAutres:{},    // { [annee]: { [clientId]: {acompte1,acompte2,acompte3,is,irpp,declarationEmployeur,bilanRne,liasseFiscale:bool} } }
+    social:{},          // { [annee]: { [clientId]: {t1..t4, cnssG1..cnssG4:bool} } }
+    parametres:{
+      formesJuridiques:['SARL','SUARL','SA','SNC','Entreprise Individuelle','Association','Autre'],
+      typesSociete:[
+        {nom:'Personne Morale', regime:'IS'},
+        {nom:'Personne Physique', regime:'IRPP'}
+      ],
+      typesDeclaration:['Régime Réel','Régime Forfaitaire','Personne Physique (BIC/BNC)','Recette de Finance'],
+      taxesFiscales:['Retenue à la source','TFP','FOPROLOS','Droit de Consommation','TVA','Autres Taxes sur CA','Taxes sur les assurances','Droit de timbre','TCL','Taxe Hôtelière','Droit de licence']
+    }
+  };
+}
+
+/* Migration depuis les anciennes versions de données (ex. parametres.collaborateurs en simples chaînes) */
+function migrerDonnees(state){
+  if((!Array.isArray(state.collaborateurs) || state.collaborateurs.length===0) &&
+     state.parametres && Array.isArray(state.parametres.collaborateurs) && state.parametres.collaborateurs.length){
+    state.collaborateurs = state.parametres.collaborateurs.filter(Boolean).map(nom => ({
+      id: genererId(), nom: String(nom), telephone:'', email:'', poste:'Agent', photo:'', actif:true
+    }));
+  }
+  if(state.parametres) delete state.parametres.collaborateurs;
+  if(!Array.isArray(state.collaborateurs)) state.collaborateurs = [];
+  if(!Array.isArray(state.taches)) state.taches = [];
+  if(!Array.isArray(state.notes)) state.notes = [];
+  // tâches créées avant l'ajout du champ Titre : on en déduit un depuis la description
+  state.taches.forEach(t=>{
+    if(!t.titre){
+      t.titre = (t.description||'').trim().split('\n')[0].slice(0,60) || 'Tâche sans titre';
+    }
+  });
+}
+
+function fusionnerAvecDefauts(data){
+  const def = donneesParDefaut();
+  const defParametres = def.parametres; // référence conservée AVANT que Object.assign(def, data) n'écrase def.parametres
+  const state = Object.assign(def, data || {});
+  state.parametres = Object.assign(defParametres, (data && data.parametres) || {});
+  if(!Array.isArray(state.clients)) state.clients = [];
+  migrerDonnees(state);
+  return state;
+}
+
+const Store = {
+  state: null,
+  _minuteurEnregistrement: null,
+  _enregistrementEnErreur: false,
+
+  async chargerDepuisServeur(){
+    const res = await fetch('/api/data', { credentials:'same-origin' });
+    if(res.status === 401){ const e = new Error('NON_AUTHENTIFIE'); e.code = 401; throw e; }
+    if(!res.ok) throw new Error('Erreur serveur (' + res.status + ')');
+    const data = await res.json();
+    this.state = fusionnerAvecDefauts(data);
+    return this.state;
+  },
+
+  save(){
+    clearTimeout(this._minuteurEnregistrement);
+    this._minuteurEnregistrement = setTimeout(()=>this._enregistrerMaintenant(), 350);
+  },
+
+  async _enregistrerMaintenant(){
+    try{
+      const res = await fetch('/api/data', {
+        method:'PUT', credentials:'same-origin',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify(this.state)
+      });
+      if(res.status === 401){
+        toast('Session expirée — reconnectez-vous pour continuer à enregistrer.', 'erreur');
+        Auth.deconnecterEtAfficherEcran();
+        return false;
+      }
+      if(!res.ok) throw new Error('Erreur serveur (' + res.status + ')');
+      this._enregistrementEnErreur = false;
+      return true;
+    }catch(e){
+      console.error('Erreur d\'enregistrement en ligne', e);
+      if(!this._enregistrementEnErreur){
+        this._enregistrementEnErreur = true;
+        toast('Erreur de synchronisation — vérifiez votre connexion internet. Nouvelle tentative dans 5s…', 'erreur');
+        setTimeout(()=>this._enregistrerMaintenant(), 5000);
+      }
+      return false;
+    }
+  },
+
+  exporter(){
+    const blob = new Blob([JSON.stringify(this.state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const pad = n => String(n).padStart(2,'0');
+    a.href = url;
+    a.download = `suivi-fiscal-social_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast('Export JSON téléchargé.', 'succes');
+  },
+
+  importer(fichier){
+    const lecteur = new FileReader();
+    lecteur.onload = (e) => {
+      try{
+        const data = JSON.parse(e.target.result);
+        if(!data || !Array.isArray(data.clients)){
+          throw new Error('Format de fichier invalide');
+        }
+        const messageAgent = 'Cette opération va remplacer les données des clients qui vous sont attachés par le contenu du fichier importé (les autres clients du cabinet ne sont pas affectés). Continuer ?';
+        const messageSuperviseur = 'Cette opération va remplacer toutes les données actuellement enregistrées pour ce cabinet par le contenu du fichier importé. Continuer ?';
+        ouvrirConfirmation({
+          titre:'Importer les données',
+          message: Auth.currentUser.role==='agent' ? messageAgent : messageSuperviseur,
+          libelleBouton:'Importer et remplacer',
+          danger:true,
+          onConfirmer: async ()=>{
+            Store.state = fusionnerAvecDefauts(data);
+            const ok = await Store._enregistrerMaintenant();
+            if(ok){
+              await Store.chargerDepuisServeur();
+              App.currentYearFiscal = ANNEE_COURANTE;
+              App.currentYearSocial = ANNEE_COURANTE;
+              App.render();
+              toast('Données importées avec succès.', 'succes');
+            }
+          }
+        });
+      }catch(err){
+        toast('Le fichier sélectionné n\'est pas un export valide.', 'erreur');
+      }
+    };
+    lecteur.readAsText(fichier);
+  }
+};
+
+/* =========================================================
+   UTILITAIRES
+   ========================================================= */
+function genererId(){ return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9); }
+function echapper(s){
+  if(s===undefined||s===null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toast(message, type){
+  const cont = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.textContent = message;
+  cont.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),260); }, 2600);
+}
+const MOIS_LABELS = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+const MOIS_CLES = ['m1','m2','m3','m4','m5','m6','m7','m8','m9','m10','m11','m12'];
+
+function normaliser(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+
+function todayIso(){
+  const d = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+function addDaysIso(iso, n){
+  const [y,m,d] = iso.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  dt.setDate(dt.getDate() + n);
+  const pad = x => String(x).padStart(2,'0');
+  return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}`;
+}
+function formatDateFr(iso){
+  if(!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function initiales(nom){
+  return (nom||'').trim().split(/\s+/).slice(0,2).map(m=>m[0]).join('').toUpperCase() || '?';
+}
+function regimeSocieteClient(c){
+  const def = Store.state.parametres.typesSociete.find(t=>t.nom===c.typeSociete);
+  return def ? def.regime : 'autre';
+}
+
+/* =========================================================
+   MODALES GENERIQUES (confirmation)
+   ========================================================= */
+function fermerOverlay(){
+  const ov = document.querySelector('.overlay');
+  if(ov) ov.remove();
+}
+function ouvrirConfirmation({titre, message, libelleBouton, danger, onConfirmer}){
+  fermerOverlay();
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `
+    <div class="modale modale-petite">
+      <div class="modale-entete">
+        <h2>${echapper(titre)}</h2>
+        <button class="modale-fermer" data-fermer>${svg('close')}</button>
+      </div>
+      <div class="modale-corps">
+        <p style="margin:0;font-size:13.5px;color:#334155;line-height:1.55;">${echapper(message)}</p>
+      </div>
+      <div class="modale-pied">
+        <button class="btn btn-secondaire" data-fermer>Annuler</button>
+        <button class="btn ${danger?'btn-danger':'btn-primaire'}" data-confirmer>${echapper(libelleBouton||'Confirmer')}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+  ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+  ov.querySelector('[data-confirmer]').addEventListener('click', ()=>{ fermerOverlay(); onConfirmer(); });
+}
+
+/* =========================================================
+   APPLICATION / ROUTEUR
+   ========================================================= */
+const App = {
+  route:'clients',
+  currentYearFiscal: ANNEE_COURANTE,
+  currentYearSocial: ANNEE_COURANTE,
+  sousOngletFiscal: 'mensuel',
+  sousOngletCollab: 'liste',
+  filtresClients:{ q:'', collaborateur:'' },
+  filtresFiscal:{ q:'', collaborateur:'' },
+  filtresSocial:{ q:'', collaborateur:'' },
+  filtresCollab:{ q:'' },
+  filtresTaches:{ collaborateurId:'', statut:'', titre:'' },
+  filtresNotes:{ clientId:'', collaborateur:'' },
+
+  navItems:[
+    {id:'clients', label:'Clients', icon:'clients'},
+    {id:'suivi-fiscal', label:'Suivi Fiscal', icon:'fiscal'},
+    {id:'suivi-social', label:'Suivi Social', icon:'social'},
+    {id:'collaborateurs', label:'Collaborateurs', icon:'collaborateurs'},
+    {id:'notes', label:'Notes', icon:'notes'},
+    {id:'parametres', label:'Paramètres', icon:'parametres'}
+  ],
+
+  init(){
+    // Store.state est déjà chargé depuis le serveur par Auth.demarrer() avant l'appel à App.init().
+    document.getElementById('logo-icone-slot').innerHTML = svg('clients');
+    document.querySelectorAll('#sidebar-bas .icn-slot').forEach(el=>{
+      el.innerHTML = svg(el.getAttribute('data-icon'));
+    });
+    document.getElementById('nom-cabinet-sidebar').textContent = Auth.currentUser.cabinetNom || '—';
+    document.getElementById('nom-utilisateur').textContent = Auth.currentUser.nom || '—';
+    document.getElementById('role-utilisateur').textContent = Auth.currentUser.role==='superviseur' ? 'Superviseur' : 'Agent';
+    document.getElementById('avatar-utilisateur').textContent = initiales(Auth.currentUser.nom);
+    document.getElementById('btn-deconnexion').addEventListener('click', ()=>Auth.deconnecter());
+    this.construireNav();
+    document.getElementById('btn-export').addEventListener('click', ()=>Store.exporter());
+    document.getElementById('btn-import').addEventListener('click', ()=>document.getElementById('input-import').click());
+    document.getElementById('input-import').addEventListener('change', (e)=>{
+      const f = e.target.files[0];
+      if(f) Store.importer(f);
+      e.target.value = '';
+    });
+    this.render();
+  },
+
+  construireNav(){
+    const nav = document.getElementById('nav-principale');
+    const estAgent = Auth.currentUser.role === 'agent';
+    const items = estAgent ? this.navItems.filter(i=>i.id!=='parametres') : this.navItems;
+    if(estAgent && this.route==='parametres') this.route = 'clients';
+    nav.innerHTML = items.map(item => `
+      <div class="nav-item${this.route===item.id?' actif':''}" data-route="${item.id}">
+        ${svg(item.icon)}
+        <span>${item.label}</span>
+      </div>`).join('');
+    nav.querySelectorAll('.nav-item').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        this.route = el.getAttribute('data-route');
+        this.construireNav();
+        this.render();
+      });
+    });
+  },
+
+  render(){
+    const modules = {
+      'clients': Clients,
+      'suivi-fiscal': SuiviFiscal,
+      'suivi-social': SuiviSocial,
+      'collaborateurs': Collaborateurs,
+      'notes': Notes,
+      'parametres': Parametres
+    };
+    const mod = modules[this.route] || Clients;
+    document.getElementById('contenu').innerHTML = mod.render();
+    mod.brancher && mod.brancher();
+  }
+};
+
+/* =========================================================
+   MODULE 1 — CLIENTS
+   ========================================================= */
+const Clients = {
+  render(){
+    const st = Store.state;
+    const f = App.filtresClients;
+    let liste = st.clients.slice().sort((a,b)=> normaliser(a.raisonSociale).localeCompare(normaliser(b.raisonSociale)));
+    if(f.q){
+      const q = normaliser(f.q);
+      liste = liste.filter(c => normaliser(c.raisonSociale).includes(q) || normaliser(c.matriculeFiscal).includes(q) || normaliser(c.telephone).includes(q));
+    }
+    if(f.collaborateur){
+      liste = liste.filter(c => c.collaborateur === f.collaborateur);
+    }
+
+    const optionsCollab = st.collaborateurs.map(c=>`<option value="${echapper(c.nom)}"${f.collaborateur===c.nom?' selected':''}>${echapper(c.nom)}</option>`).join('');
+
+    let corpsTableau;
+    if(liste.length===0){
+      corpsTableau = `<div class="etat-vide">${svg('empty')}<div>Aucun client ${st.clients.length? 'ne correspond aux filtres':'pour le moment'}.</div></div>`;
+    } else {
+      corpsTableau = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="col-sticky">Raison Sociale</th>
+            <th>Matricule Fiscal</th>
+            <th>Forme Juridique</th>
+            <th>Type Société</th>
+            <th>Type Déclaration</th>
+            <th>Collaborateur</th>
+            <th>Téléphone</th>
+            <th style="text-align:right;">Actions</th>
+          </tr></thead>
+          <tbody>
+            ${liste.map(c => `
+              <tr>
+                <td class="col-sticky nom-client-cell">
+                  <b>${echapper(c.raisonSociale)}</b>
+                  ${c.nomGerant? `<span>Gérant : ${echapper(c.nomGerant)}</span>`:''}
+                </td>
+                <td>${echapper(c.matriculeFiscal)||'—'}</td>
+                <td>${echapper(c.formeJuridique)||'—'}</td>
+                <td>${c.typeSociete? `<span class="badge-neutre">${echapper(c.typeSociete)}</span>`:'—'}</td>
+                <td>${echapper(c.typeDeclaration)||'—'}</td>
+                <td>${echapper(c.collaborateur)||'—'}</td>
+                <td>${echapper(c.telephone)||'—'}</td>
+                <td style="text-align:right;">
+                  <div style="display:flex;gap:6px;justify-content:flex-end;">
+                    <button class="btn-icone" data-voir="${c.id}" title="Voir la fiche">${svg('eye')}</button>
+                    <button class="btn-icone" data-editer="${c.id}" title="Modifier">${svg('edit')}</button>
+                    <button class="btn-icone danger" data-supprimer="${c.id}" title="Supprimer">${svg('delete')}</button>
+                  </div>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }
+
+    return `
+      <div class="page-header-titre">
+        <h1 class="titre-avec-icone">
+          <span class="icone-titre">${svg('clients')}</span>
+          <span>Clients</span>
+          <span class="compteur-titre"><span class="point"></span>${liste.length} Client${liste.length>1?'s':''}</span>
+        </h1>
+        <p class="sous-titre">Fiche complète de chaque client du cabinet.</p>
+      </div>
+
+      <div class="panneau">
+        <div class="barre-actions-clients">
+          <div class="filtres">
+            <div class="champ-filtre">
+              <label>Recherche</label>
+              <input type="text" id="filtre-clients-q" placeholder="Raison sociale, matricule, téléphone…" value="${echapper(f.q)}">
+            </div>
+            <div class="champ-filtre">
+              <label>Collaborateur</label>
+              <select id="filtre-clients-collab">
+                <option value="">Tous</option>
+                ${optionsCollab}
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primaire" id="btn-nouveau-client">${svg('plus')} Nouveau Client</button>
+        </div>
+      </div>
+
+      ${corpsTableau}
+    `;
+  },
+
+  brancher(){
+    document.getElementById('btn-nouveau-client').addEventListener('click', ()=>this.ouvrirModale(null));
+    document.getElementById('filtre-clients-q').addEventListener('input', (e)=>{ App.filtresClients.q = e.target.value; App.render(); });
+    document.getElementById('filtre-clients-collab').addEventListener('change', (e)=>{ App.filtresClients.collaborateur = e.target.value; App.render(); });
+    document.querySelectorAll('[data-voir]').forEach(b=>b.addEventListener('click', ()=>this.ouvrirFiche(b.getAttribute('data-voir'))));
+    document.querySelectorAll('[data-editer]').forEach(b=>b.addEventListener('click', ()=>this.ouvrirModale(b.getAttribute('data-editer'))));
+    document.querySelectorAll('[data-supprimer]').forEach(b=>b.addEventListener('click', ()=>this.supprimer(b.getAttribute('data-supprimer'))));
+    // conserver le focus/curseur sur le champ de recherche après rerender
+    const champQ = document.getElementById('filtre-clients-q');
+    if(champQ && document.activeElement !== champQ && App._focusClientsQ){
+      champQ.focus(); champQ.setSelectionRange(champQ.value.length, champQ.value.length);
+    }
+  },
+
+  ouvrirFiche(clientId){
+    const c = Store.state.clients.find(x=>x.id===clientId);
+    if(!c) return;
+    const ligne = (label, valeur) => `
+      <div class="champ-form">
+        <label>${echapper(label)}</label>
+        <div class="valeur-fiche">${valeur!==undefined && valeur!==null && valeur!==''? echapper(valeur) : '<span class="valeur-fiche-vide">—</span>'}</div>
+      </div>`;
+
+    fermerOverlay();
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="modale">
+        <div class="modale-entete">
+          <h2>Fiche client</h2>
+          <button class="modale-fermer" data-fermer>${svg('close')}</button>
+        </div>
+        <div class="modale-corps">
+          <h1 class="titre-avec-icone" style="font-size:18px;margin-bottom:16px;">
+            <span class="icone-titre" style="width:30px;height:30px;">${svg('clients')}</span>
+            <span>${echapper(c.raisonSociale)}</span>
+          </h1>
+          <div class="grille-form">
+            <div class="section-form-titre">Identification</div>
+            ${ligne('Matricule Fiscal', c.matriculeFiscal)}
+            ${ligne('Matricule RNE', c.matriculeRNE)}
+            ${ligne('Matricule CNSS', c.matriculeCNSS)}
+            ${ligne('Activité', c.activite)}
+            <div class="champ-form pleine-largeur">${ligne('Adresse', c.adresse)}</div>
+
+            <div class="section-form-titre">Gérant &amp; contact</div>
+            ${ligne('Nom Gérant', c.nomGerant)}
+            ${ligne('Numéro CNSS Gérant', c.numCnssGerant)}
+            ${ligne('Numéro Téléphone', c.telephone)}
+            ${ligne('Adresse mail', c.email)}
+
+            <div class="section-form-titre">Classification &amp; suivi</div>
+            ${ligne('Forme Juridique', c.formeJuridique)}
+            ${ligne('Type Société', c.typeSociete)}
+            ${ligne('Type Déclaration', c.typeDeclaration)}
+            ${ligne('Collaborateur', c.collaborateur)}
+
+            <div class="section-form-titre">Taxes Fiscales Associées</div>
+            <div class="champ-form pleine-largeur">
+              <div class="valeur-fiche">
+                ${(c.taxesFiscales && c.taxesFiscales.length)
+                  ? c.taxesFiscales.map(t=>`<span class="badge-neutre" style="margin:2px 4px 2px 0;">${echapper(t)}</span>`).join('')
+                  : '<span class="valeur-fiche-vide">—</span>'}
+              </div>
+            </div>
+
+            <div class="section-form-titre">Accès</div>
+            <div class="champ-form pleine-largeur">
+              <label>Mot Passe TEJ</label>
+              <div class="champ-mdp">
+                <div class="valeur-fiche" id="fiche-mdp-tej" data-valeur="${echapper(c.motPasseTej)}">${c.motPasseTej? '••••••••' : '<span class="valeur-fiche-vide">—</span>'}</div>
+                ${c.motPasseTej? `<button type="button" id="btn-toggle-mdp-fiche">${svg('eye')}</button>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modale-pied">
+          <button class="btn btn-secondaire" data-fermer>Fermer</button>
+          <button class="btn btn-primaire" id="btn-fiche-modifier">${svg('edit')} Modifier</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+    ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+    const btnMdp = ov.querySelector('#btn-toggle-mdp-fiche');
+    if(btnMdp){
+      let masque = true;
+      btnMdp.addEventListener('click', ()=>{
+        const zone = ov.querySelector('#fiche-mdp-tej');
+        masque = !masque;
+        zone.textContent = masque ? '••••••••' : zone.getAttribute('data-valeur');
+        btnMdp.innerHTML = svg(masque ? 'eye' : 'eyeOff');
+      });
+    }
+    ov.querySelector('#btn-fiche-modifier').addEventListener('click', ()=>{ fermerOverlay(); this.ouvrirModale(clientId); });
+  },
+
+  ouvrirModale(clientId){
+    const st = Store.state;
+    const c = clientId ? st.clients.find(x=>x.id===clientId) : null;
+    const p = st.parametres;
+
+    const optForme = p.formesJuridiques.map(v=>`<option value="${echapper(v)}"${c&&c.formeJuridique===v?' selected':''}>${echapper(v)}</option>`).join('');
+    const optType = p.typesSociete.map(v=>`<option value="${echapper(v.nom)}"${c&&c.typeSociete===v.nom?' selected':''}>${echapper(v.nom)}</option>`).join('');
+    const optDecl = p.typesDeclaration.map(v=>`<option value="${echapper(v)}"${c&&c.typeDeclaration===v?' selected':''}>${echapper(v)}</option>`).join('');
+    const optCollab = st.collaborateurs.map(v=>`<option value="${echapper(v.nom)}"${c&&c.collaborateur===v.nom?' selected':''}>${echapper(v.nom)}${v.actif?'':' (inactif)'}</option>`).join('');
+
+    fermerOverlay();
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="modale">
+        <div class="modale-entete">
+          <h2>${c? 'Modifier le client' : 'Nouveau client'}</h2>
+          <button class="modale-fermer" data-fermer>${svg('close')}</button>
+        </div>
+        <div class="modale-corps">
+          <form id="form-client">
+            <div class="grille-form">
+              <div class="section-form-titre">Identification</div>
+              <div class="champ-form pleine-largeur">
+                <label>Raison sociale <span class="req">*</span></label>
+                <input type="text" name="raisonSociale" required value="${echapper(c&&c.raisonSociale)}">
+              </div>
+              <div class="champ-form">
+                <label>Matricule Fiscal</label>
+                <input type="text" name="matriculeFiscal" value="${echapper(c&&c.matriculeFiscal)}">
+              </div>
+              <div class="champ-form">
+                <label>Matricule RNE</label>
+                <input type="text" name="matriculeRNE" value="${echapper(c&&c.matriculeRNE)}">
+              </div>
+              <div class="champ-form">
+                <label>Matricule CNSS</label>
+                <input type="text" name="matriculeCNSS" value="${echapper(c&&c.matriculeCNSS)}">
+              </div>
+              <div class="champ-form">
+                <label>Activité</label>
+                <input type="text" name="activite" value="${echapper(c&&c.activite)}">
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Adresse</label>
+                <input type="text" name="adresse" value="${echapper(c&&c.adresse)}">
+              </div>
+
+              <div class="section-form-titre">Gérant &amp; contact</div>
+              <div class="champ-form">
+                <label>Nom Gérant</label>
+                <input type="text" name="nomGerant" value="${echapper(c&&c.nomGerant)}">
+              </div>
+              <div class="champ-form">
+                <label>Numéro CNSS Gérant</label>
+                <input type="text" name="numCnssGerant" value="${echapper(c&&c.numCnssGerant)}">
+              </div>
+              <div class="champ-form">
+                <label>Numéro Téléphone</label>
+                <input type="text" name="telephone" value="${echapper(c&&c.telephone)}">
+              </div>
+              <div class="champ-form">
+                <label>Adresse mail</label>
+                <input type="email" name="email" value="${echapper(c&&c.email)}">
+              </div>
+
+              <div class="section-form-titre">Classification &amp; suivi</div>
+              <div class="champ-form">
+                <label>Forme Juridique</label>
+                <select name="formeJuridique"><option value="">—</option>${optForme}</select>
+              </div>
+              <div class="champ-form">
+                <label>Type Société</label>
+                <select name="typeSociete"><option value="">—</option>${optType}</select>
+              </div>
+              <div class="champ-form">
+                <label>Type Déclaration</label>
+                <select name="typeDeclaration"><option value="">—</option>${optDecl}</select>
+              </div>
+              <div class="champ-form">
+                <label>Collaborateur</label>
+                <select name="collaborateur"><option value="">—</option>${optCollab}</select>
+              </div>
+
+              <div class="section-form-titre">Taxes Fiscales Associées</div>
+              <div class="champ-form pleine-largeur">
+                <div class="grille-checkboxes">
+                  ${p.taxesFiscales.map(t=>`
+                    <label class="checkbox-item">
+                      <input type="checkbox" name="taxesFiscales" value="${echapper(t)}"${c&&Array.isArray(c.taxesFiscales)&&c.taxesFiscales.includes(t)?' checked':''}>
+                      <span>${echapper(t)}</span>
+                    </label>`).join('')}
+                </div>
+              </div>
+
+              <div class="section-form-titre">Accès</div>
+              <div class="champ-form pleine-largeur">
+                <label>Mot Passe TEJ</label>
+                <div class="champ-mdp">
+                  <input type="password" name="motPasseTej" id="champ-mdp-tej" value="${echapper(c&&c.motPasseTej)}">
+                  <button type="button" id="btn-toggle-mdp">${svg('eye')}</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modale-pied">
+          <button class="btn btn-secondaire" data-fermer>Annuler</button>
+          <button class="btn btn-primaire" id="btn-enregistrer-client">${c?'Enregistrer':'Ajouter le client'}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+    ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+    if(Auth.currentUser.role === 'agent'){
+      // un agent ne peut attacher un client qu'à lui-même — le serveur l'impose de toute façon,
+      // mais on verrouille aussi le champ pour éviter une sélection trompeuse à l'écran
+      const selCollab = ov.querySelector('select[name="collaborateur"]');
+      if(selCollab){
+        selCollab.value = Auth.currentUser.nom;
+        selCollab.disabled = true;
+        const cache = document.createElement('input');
+        cache.type = 'hidden'; cache.name = 'collaborateur'; cache.value = Auth.currentUser.nom;
+        selCollab.insertAdjacentElement('afterend', cache);
+      }
+    }
+    ov.querySelector('#btn-toggle-mdp').addEventListener('click', ()=>{
+      const champ = document.getElementById('champ-mdp-tej');
+      const btn = ov.querySelector('#btn-toggle-mdp');
+      const masque = champ.type === 'password';
+      champ.type = masque ? 'text' : 'password';
+      btn.innerHTML = svg(masque ? 'eyeOff' : 'eye');
+    });
+    ov.querySelector('#btn-enregistrer-client').addEventListener('click', ()=>{
+      const form = document.getElementById('form-client');
+      if(!form.reportValidity()) return;
+      const fd = new FormData(form);
+      const obj = {};
+      fd.forEach((v,k)=>{ if(k!=='taxesFiscales') obj[k]=v.trim(); });
+      obj.taxesFiscales = fd.getAll('taxesFiscales');
+      // le filtrage des clients par agent se fait par id (fiable), le nom reste utilisé pour l'affichage
+      const collabChoisi = Store.state.collaborateurs.find(x=>x.nom===obj.collaborateur);
+      obj.collaborateurId = collabChoisi ? collabChoisi.id : '';
+      if(c){
+        Object.assign(c, obj);
+        toast('Client modifié.', 'succes');
+      } else {
+        obj.id = genererId();
+        Store.state.clients.push(obj);
+        toast('Client ajouté.', 'succes');
+      }
+      Store.save();
+      fermerOverlay();
+      App.render();
+    });
+  },
+
+  supprimer(clientId){
+    const st = Store.state;
+    const c = st.clients.find(x=>x.id===clientId);
+    if(!c) return;
+    ouvrirConfirmation({
+      titre:'Supprimer le client',
+      message:`Voulez-vous vraiment supprimer « ${c.raisonSociale} » ? Son historique de suivi fiscal et social (toutes années confondues) sera également supprimé. Cette action est irréversible.`,
+      libelleBouton:'Supprimer',
+      danger:true,
+      onConfirmer:()=>{
+        st.clients = st.clients.filter(x=>x.id!==clientId);
+        ['fiscalMensuel','fiscalAutres','social'].forEach(cle=>{
+          Object.keys(st[cle]).forEach(annee=>{ delete st[cle][annee][clientId]; });
+        });
+        st.notes = st.notes.filter(n=>n.clientId!==clientId);
+        Store.save();
+        toast('Client supprimé.', 'succes');
+        App.render();
+      }
+    });
+  }
+};
+
+/* =========================================================
+   OUTILS COMMUNS AUX TABLEAUX DE SUIVI (année, garantie de structure)
+   ========================================================= */
+function garantirAnnee(bucket, annee, clientId, gabarit){
+  annee = String(annee);
+  if(!bucket[annee]) bucket[annee] = {};
+  if(!bucket[annee][clientId]) bucket[annee][clientId] = Object.assign({}, gabarit);
+  return bucket[annee][clientId];
+}
+function clientsFiltres(filtre){
+  let liste = Store.state.clients.slice().sort((a,b)=> normaliser(a.raisonSociale).localeCompare(normaliser(b.raisonSociale)));
+  if(filtre.q){
+    const q = normaliser(filtre.q);
+    liste = liste.filter(c => normaliser(c.raisonSociale).includes(q));
+  }
+  if(filtre.collaborateur){
+    liste = liste.filter(c => c.collaborateur === filtre.collaborateur);
+  }
+  return liste;
+}
+function selecteurAnneeHtml(id, valeur){
+  return `
+    <div class="champ-annee">
+      <button type="button" id="${id}-moins">−</button>
+      <div class="valeur-annee">${valeur}</div>
+      <button type="button" id="${id}-plus">+</button>
+    </div>`;
+}
+function barreFiltresHtml(prefix, filtre, collaborateurs, selecteurAnneeId, annee){
+  const optionsCollab = collaborateurs.map(c=>`<option value="${echapper(c)}"${filtre.collaborateur===c?' selected':''}>${echapper(c)}</option>`).join('');
+  return `
+    <div class="panneau">
+      <div class="page-header">
+        <div class="filtres">
+          <div class="champ-filtre">
+            <label>Recherche client</label>
+            <input type="text" id="${prefix}-filtre-q" placeholder="Nom du client…" value="${echapper(filtre.q)}">
+          </div>
+          <div class="champ-filtre">
+            <label>Collaborateur</label>
+            <select id="${prefix}-filtre-collab">
+              <option value="">Tous</option>
+              ${optionsCollab}
+            </select>
+          </div>
+          <div class="champ-filtre">
+            <label>Année</label>
+            ${selecteurAnneeHtml(selecteurAnneeId, annee)}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+function brancherFiltresCommuns(prefix, filtreObj, selecteurAnneeId, getAnnee, setAnnee){
+  document.getElementById(`${prefix}-filtre-q`).addEventListener('input', (e)=>{ filtreObj.q = e.target.value; App.render(); });
+  document.getElementById(`${prefix}-filtre-collab`).addEventListener('change', (e)=>{ filtreObj.collaborateur = e.target.value; App.render(); });
+  document.getElementById(`${selecteurAnneeId}-moins`).addEventListener('click', ()=>{ setAnnee(getAnnee()-1); App.render(); });
+  document.getElementById(`${selecteurAnneeId}-plus`).addEventListener('click', ()=>{ setAnnee(getAnnee()+1); App.render(); });
+}
+
+/* =========================================================
+   MODULE 2 — SUIVI FISCAL (Déclaration mensuelle / Autres déclarations)
+   ========================================================= */
+const GABARIT_MENSUEL = MOIS_CLES.reduce((o,k)=>(o[k]=false,o),{});
+const GABARIT_AUTRES = {acompte1:false, acompte2:false, acompte3:false, is:false, irpp:false, declarationEmployeur:false, bilanRne:false, liasseFiscale:false};
+
+const SuiviFiscal = {
+  render(){
+    const annee = App.currentYearFiscal;
+    const liste = clientsFiltres(App.filtresFiscal);
+    const st = Store.state;
+
+    const onglets = `
+      <div class="sous-onglets">
+        <div class="sous-onglet${App.sousOngletFiscal==='mensuel'?' actif':''}" data-onglet="mensuel">Déclaration Mensuelle</div>
+        <div class="sous-onglet${App.sousOngletFiscal==='autres'?' actif':''}" data-onglet="autres">Autres Déclarations</div>
+      </div>`;
+
+    let corps;
+    if(App.sousOngletFiscal === 'mensuel') corps = this.renderMensuel(annee, liste);
+    else corps = this.renderAutres(annee, liste);
+
+    return `
+      <div class="page-header-titre">
+        <h1 class="titre-avec-icone">
+          <span class="icone-titre">${svg('fiscal')}</span>
+          <span>Suivi Fiscal</span>
+        </h1>
+        <p class="sous-titre">Suivi des dépôts de déclarations fiscales, mois par mois et par échéance annuelle.</p>
+      </div>
+      ${onglets}
+      ${barreFiltresHtml('fiscal', App.filtresFiscal, st.collaborateurs.map(c=>c.nom), 'sel-annee-fiscal', annee)}
+      ${corps}
+    `;
+  },
+
+  renderMensuel(annee, liste){
+    const st = Store.state;
+    let totalVert=0, totalRouge=0;
+    liste.forEach(c=>{
+      const d = garantirAnnee(st.fiscalMensuel, annee, c.id, GABARIT_MENSUEL);
+      MOIS_CLES.forEach(m=>{ d[m] ? totalVert++ : totalRouge++; });
+    });
+
+    const corps = liste.length===0 ? `<div class="etat-vide">${svg('empty')}<div>Aucun client à afficher.</div></div>` : `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="col-sticky">Client</th>
+            <th>Type Société</th>
+            <th>Type Déclaration</th>
+            ${MOIS_LABELS.map(m=>`<th style="text-align:center;">${m}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${liste.map(c=>{
+              const d = garantirAnnee(st.fiscalMensuel, annee, c.id, GABARIT_MENSUEL);
+              return `<tr>
+                <td class="col-sticky nom-client-cell"><b>${echapper(c.raisonSociale)}</b></td>
+                <td>${c.typeSociete? `<span class="badge-neutre">${echapper(c.typeSociete)}</span>`:'—'}</td>
+                <td>${echapper(c.typeDeclaration)||'—'}</td>
+                ${MOIS_CLES.map(m=>`
+                  <td class="cellule-toggle" data-toggle-mensuel="${c.id}|${m}">
+                    <span class="puce-toggle ${d[m]?'vert':'rouge'}">${d[m]?'✓':'✕'}</span>
+                  </td>`).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="legende">
+        <div class="item-legende"><span class="pastille vert"></span> Déposée</div>
+        <div class="item-legende"><span class="pastille rouge"></span> Non déposée — cliquez sur une case pour basculer son état</div>
+      </div>`;
+
+    return `
+      <div class="stats-mini-row">
+        <div class="stat-mini-box"><div class="label">Clients affichés</div><div class="valeur">${liste.length}</div></div>
+        <div class="stat-mini-box vert"><div class="label">Cases Déposées</div><div class="valeur">${totalVert}</div></div>
+        <div class="stat-mini-box rouge"><div class="label">Cases Non Déposées</div><div class="valeur">${totalRouge}</div></div>
+      </div>
+      ${corps}`;
+  },
+
+  renderAutres(annee, liste){
+    const st = Store.state;
+    const colonnes = [
+      {cle:'acompte1', label:'Acompte-1'},
+      {cle:'acompte2', label:'Acompte-2'},
+      {cle:'acompte3', label:'Acompte-3'},
+      {cle:'is', label:'Déclaration IS'},
+      {cle:'irpp', label:'Déclaration IRPP'},
+      {cle:'declarationEmployeur', label:'Déclaration Employeur'},
+      {cle:'bilanRne', label:'Bilan RNE'},
+      {cle:'liasseFiscale', label:'Liasse Fiscale'}
+    ];
+    let totalVert=0, totalRouge=0, totalNA=0;
+
+    function regimeClient(c){
+      const def = st.parametres.typesSociete.find(t=>t.nom===c.typeSociete);
+      return def ? def.regime : 'autre';
+    }
+    function estRecetteDeFinance(c){
+      const t = normaliser(c.typeDeclaration);
+      return t.includes('recette') && t.includes('finance');
+    }
+    function estApplicable(c, cle){
+      if(cle==='is' || cle==='irpp'){
+        const reg = regimeClient(c);
+        if(reg==='IS') return cle==='is';
+        if(reg==='IRPP') return cle==='irpp';
+        return true; // régime non précisé -> les deux colonnes restent actives
+      }
+      if(cle==='liasseFiscale' && estRecetteDeFinance(c)) return false; // Type Déclaration "Recette de Finance" -> pas de Liasse Fiscale
+      return true;
+    }
+
+    liste.forEach(c=>{
+      const d = garantirAnnee(st.fiscalAutres, annee, c.id, GABARIT_AUTRES);
+      colonnes.forEach(col=>{
+        if(!estApplicable(c, col.cle)){ totalNA++; return; }
+        d[col.cle] ? totalVert++ : totalRouge++;
+      });
+    });
+
+    const corps = liste.length===0 ? `<div class="etat-vide">${svg('empty')}<div>Aucun client à afficher.</div></div>` : `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="col-sticky">Client</th>
+            ${colonnes.map(col=>`<th style="text-align:center;">${col.label}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${liste.map(c=>{
+              const d = garantirAnnee(st.fiscalAutres, annee, c.id, GABARIT_AUTRES);
+              return `<tr>
+                <td class="col-sticky nom-client-cell"><b>${echapper(c.raisonSociale)}</b></td>
+                ${colonnes.map(col=>{
+                  const applicable = estApplicable(c, col.cle);
+                  if(!applicable){
+                    return `<td class="cellule-toggle na"><span class="puce-toggle na">—</span></td>`;
+                  }
+                  return `<td class="cellule-toggle" data-toggle-autres="${c.id}|${col.cle}">
+                    <span class="puce-toggle ${d[col.cle]?'vert':'rouge'}">${d[col.cle]?'✓':'✕'}</span>
+                  </td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="legende">
+        <div class="item-legende"><span class="pastille vert"></span> Déposée</div>
+        <div class="item-legende"><span class="pastille rouge"></span> Non déposée</div>
+        <div class="item-legende"><span class="pastille na"></span> Non applicable (selon le Type Société ou le Type Déclaration du client)</div>
+      </div>`;
+
+    return `
+      <div class="stats-mini-row">
+        <div class="stat-mini-box"><div class="label">Clients affichés</div><div class="valeur">${liste.length}</div></div>
+        <div class="stat-mini-box vert"><div class="label">Cases Déposées</div><div class="valeur">${totalVert}</div></div>
+        <div class="stat-mini-box rouge"><div class="label">Cases Non Déposées</div><div class="valeur">${totalRouge}</div></div>
+      </div>
+      ${corps}`;
+  },
+
+  brancher(){
+    document.querySelectorAll('.sous-onglet').forEach(el=>{
+      el.addEventListener('click', ()=>{ App.sousOngletFiscal = el.getAttribute('data-onglet'); App.render(); });
+    });
+    brancherFiltresCommuns('fiscal', App.filtresFiscal, 'sel-annee-fiscal',
+      ()=>App.currentYearFiscal, (v)=>{ App.currentYearFiscal=v; });
+
+    document.querySelectorAll('[data-toggle-mensuel]').forEach(td=>{
+      td.addEventListener('click', ()=>{
+        const [clientId, mois] = td.getAttribute('data-toggle-mensuel').split('|');
+        const d = garantirAnnee(Store.state.fiscalMensuel, App.currentYearFiscal, clientId, GABARIT_MENSUEL);
+        d[mois] = !d[mois];
+        Store.save();
+        App.render();
+      });
+    });
+    document.querySelectorAll('[data-toggle-autres]').forEach(td=>{
+      td.addEventListener('click', ()=>{
+        const [clientId, cle] = td.getAttribute('data-toggle-autres').split('|');
+        const d = garantirAnnee(Store.state.fiscalAutres, App.currentYearFiscal, clientId, GABARIT_AUTRES);
+        d[cle] = !d[cle];
+        Store.save();
+        App.render();
+      });
+    });
+  }
+};
+
+/* =========================================================
+   MODULE 3 — SUIVI SOCIAL
+   ========================================================= */
+const GABARIT_SOCIAL = {t1:false,t2:false,t3:false,t4:false,cnssG1:false,cnssG2:false,cnssG3:false,cnssG4:false};
+
+const SuiviSocial = {
+  render(){
+    const annee = App.currentYearSocial;
+    const liste = clientsFiltres(App.filtresSocial);
+    const st = Store.state;
+
+    const colonnes = [
+      {cle:'t1', label:'Trimestre-1', groupe:'CNSS'},
+      {cle:'t2', label:'Trimestre-2', groupe:'CNSS'},
+      {cle:'t3', label:'Trimestre-3', groupe:'CNSS'},
+      {cle:'t4', label:'Trimestre-4', groupe:'CNSS'},
+      {cle:'cnssG1', label:'CNSS Gérant TR-1', groupe:'Gérant'},
+      {cle:'cnssG2', label:'CNSS Gérant TR-2', groupe:'Gérant'},
+      {cle:'cnssG3', label:'CNSS Gérant TR-3', groupe:'Gérant'},
+      {cle:'cnssG4', label:'CNSS Gérant TR-4', groupe:'Gérant'}
+    ];
+
+    function estApplicableSocial(c, cle){
+      if(cle==='t1'||cle==='t2'||cle==='t3'||cle==='t4') return !!(c.matriculeCNSS && c.matriculeCNSS.trim());
+      return !!(c.numCnssGerant && c.numCnssGerant.trim());
+    }
+
+    let totalVert=0, totalRouge=0;
+    liste.forEach(c=>{
+      const d = garantirAnnee(st.social, annee, c.id, GABARIT_SOCIAL);
+      colonnes.forEach(col=>{
+        if(!estApplicableSocial(c, col.cle)) return;
+        d[col.cle] ? totalVert++ : totalRouge++;
+      });
+    });
+
+    const corps = liste.length===0 ? `<div class="etat-vide">${svg('empty')}<div>Aucun client à afficher.</div></div>` : `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th class="col-sticky">Client</th>
+            ${colonnes.map(col=>`<th style="text-align:center;">${col.label}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${liste.map(c=>{
+              const d = garantirAnnee(st.social, annee, c.id, GABARIT_SOCIAL);
+              return `<tr>
+                <td class="col-sticky nom-client-cell">
+                  <b>${echapper(c.raisonSociale)}</b>
+                  ${c.nomGerant? `<span>Gérant : ${echapper(c.nomGerant)}</span>`:''}
+                </td>
+                ${colonnes.map(col=>{
+                  const applicable = estApplicableSocial(c, col.cle);
+                  if(!applicable){
+                    return `<td class="cellule-toggle na" title="Numéro CNSS${col.groupe==='Gérant'?' Gérant':''} manquant sur la fiche client"><span class="puce-toggle na">—</span></td>`;
+                  }
+                  return `<td class="cellule-toggle" data-toggle-social="${c.id}|${col.cle}">
+                    <span class="puce-toggle ${d[col.cle]?'vert':'rouge'}">${d[col.cle]?'✓':'✕'}</span>
+                  </td>`;
+                }).join('')}
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="legende">
+        <div class="item-legende"><span class="pastille vert"></span> Déposée</div>
+        <div class="item-legende"><span class="pastille rouge"></span> Non déposée — cliquez sur une case pour basculer son état</div>
+        <div class="item-legende"><span class="pastille na"></span> Non applicable (Numéro CNSS / Numéro CNSS Gérant manquant sur la fiche client)</div>
+      </div>`;
+
+    return `
+      <div class="page-header-titre">
+        <h1 class="titre-avec-icone">
+          <span class="icone-titre">${svg('social')}</span>
+          <span>Suivi Social</span>
+        </h1>
+        <p class="sous-titre">Suivi des dépôts trimestriels CNSS, pour la société et pour le gérant.</p>
+      </div>
+      ${barreFiltresHtml('social', App.filtresSocial, st.collaborateurs.map(c=>c.nom), 'sel-annee-social', annee)}
+      <div class="stats-mini-row">
+        <div class="stat-mini-box"><div class="label">Clients affichés</div><div class="valeur">${liste.length}</div></div>
+        <div class="stat-mini-box vert"><div class="label">Cases Déposées</div><div class="valeur">${totalVert}</div></div>
+        <div class="stat-mini-box rouge"><div class="label">Cases Non Déposées</div><div class="valeur">${totalRouge}</div></div>
+      </div>
+      ${corps}
+    `;
+  },
+
+  brancher(){
+    brancherFiltresCommuns('social', App.filtresSocial, 'sel-annee-social',
+      ()=>App.currentYearSocial, (v)=>{ App.currentYearSocial=v; });
+    document.querySelectorAll('[data-toggle-social]').forEach(td=>{
+      td.addEventListener('click', ()=>{
+        const [clientId, cle] = td.getAttribute('data-toggle-social').split('|');
+        const d = garantirAnnee(Store.state.social, App.currentYearSocial, clientId, GABARIT_SOCIAL);
+        d[cle] = !d[cle];
+        Store.save();
+        App.render();
+      });
+    });
+  }
+};
+
+/* =========================================================
+   MODULE — COLLABORATEURS (Équipe / Gestion des tâches)
+   ========================================================= */
+const Collaborateurs = {
+  render(){
+    const onglets = `
+      <div class="sous-onglets">
+        <div class="sous-onglet${App.sousOngletCollab==='liste'?' actif':''}" data-onglet-collab="liste">Collaborateurs</div>
+        <div class="sous-onglet${App.sousOngletCollab==='taches'?' actif':''}" data-onglet-collab="taches">Gestion des Tâches</div>
+      </div>`;
+    const corps = App.sousOngletCollab==='taches' ? this.renderTaches() : this.renderListe();
+    return `
+      <div class="page-header-titre">
+        <h1 class="titre-avec-icone">
+          <span class="icone-titre">${svg('collaborateurs')}</span>
+          <span>Collaborateurs</span>
+        </h1>
+        <p class="sous-titre">Équipe du cabinet, clients attachés et suivi des tâches.</p>
+      </div>
+      ${onglets}
+      ${corps}
+    `;
+  },
+
+  renderListe(){
+    const st = Store.state;
+    const f = App.filtresCollab;
+    let liste = st.collaborateurs.slice().sort((a,b)=> normaliser(a.nom).localeCompare(normaliser(b.nom)));
+    if(f.q){
+      const q = normaliser(f.q);
+      liste = liste.filter(c => normaliser(c.nom).includes(q));
+    }
+
+    const nbActifs = st.collaborateurs.filter(c=>c.actif).length;
+    const nbInactifs = st.collaborateurs.length - nbActifs;
+
+    let corpsTableau;
+    if(liste.length===0){
+      corpsTableau = `<div class="etat-vide">${svg('empty')}<div>Aucun collaborateur ${st.collaborateurs.length? 'ne correspond à la recherche':'pour le moment'}.</div></div>`;
+    } else {
+      corpsTableau = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Actif</th>
+            <th>Photo</th>
+            <th>Nom Prénom</th>
+            <th>Poste</th>
+            <th style="text-align:center;">Clients attachés</th>
+            <th style="text-align:center;">Personne Morale</th>
+            <th style="text-align:center;">Personne Physique</th>
+            <th style="text-align:right;">Actions</th>
+          </tr></thead>
+          <tbody>
+            ${liste.map(col=>{
+              const clientsDuCollab = st.clients.filter(c=>c.collaborateur === col.nom);
+              const nbMorale = clientsDuCollab.filter(c=>regimeSocieteClient(c)==='IS').length;
+              const nbPhysique = clientsDuCollab.filter(c=>regimeSocieteClient(c)==='IRPP').length;
+              return `<tr>
+                <td><button class="interrupteur ${col.actif?'actif':''}" data-toggle-actif-collab="${col.id}" title="${col.actif?'Désactiver':'Activer'}"><span class="curseur"></span></button></td>
+                <td>${col.photo? `<img class="avatar-cercle" src="${col.photo}" alt="">` : `<div class="avatar-cercle avatar-initiales">${echapper(initiales(col.nom))}</div>`}</td>
+                <td><b>${echapper(col.nom)}</b>${!col.actif? ' <span class="badge-neutre">Inactif</span>':''}</td>
+                <td><span class="badge-poste badge-poste-${col.poste==='Superviseur'?'superviseur':'agent'}">${echapper(col.poste)}</span></td>
+                <td style="text-align:center;">${clientsDuCollab.length}</td>
+                <td style="text-align:center;">${nbMorale}</td>
+                <td style="text-align:center;">${nbPhysique}</td>
+                <td style="text-align:right;">
+                  <div style="display:flex;gap:6px;justify-content:flex-end;">
+                    <button class="btn-icone" data-voir-collab="${col.id}" title="Voir la fiche">${svg('eye')}</button>
+                    <button class="btn-icone" data-editer-collab="${col.id}" title="Modifier">${svg('edit')}</button>
+                    <button class="btn-icone danger" data-supprimer-collab="${col.id}" title="Supprimer">${svg('delete')}</button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }
+
+    return `
+      <div class="panneau">
+        <div class="barre-actions-clients">
+          <div class="filtres">
+            <div class="champ-filtre">
+              <label>Recherche</label>
+              <input type="text" id="filtre-collab-q" placeholder="Nom du collaborateur…" value="${echapper(f.q)}">
+            </div>
+          </div>
+          <button class="btn btn-primaire" id="btn-nouveau-collab">${svg('plus')} Nouveau Collaborateur</button>
+        </div>
+      </div>
+      <div class="stats-mini-row">
+        <div class="stat-mini-box"><div class="label">Collaborateurs</div><div class="valeur">${st.collaborateurs.length}</div></div>
+        <div class="stat-mini-box vert"><div class="label">Actifs</div><div class="valeur">${nbActifs}</div></div>
+        <div class="stat-mini-box rouge"><div class="label">Inactifs</div><div class="valeur">${nbInactifs}</div></div>
+      </div>
+      ${corpsTableau}
+    `;
+  },
+
+  renderTaches(){
+    const st = Store.state;
+    const f = App.filtresTaches;
+    let liste = st.taches.slice().sort((a,b)=> a.dateDebut.localeCompare(b.dateDebut));
+    if(f.collaborateurId) liste = liste.filter(t=>t.collaborateurId===f.collaborateurId);
+    if(f.statut) liste = liste.filter(t=>calcStatutTache(t)===f.statut);
+    if(f.titre){
+      const q = normaliser(f.titre);
+      liste = liste.filter(t=>normaliser(t.titre).includes(q));
+    }
+
+    const nomCollab = (id)=>{ const c = st.collaborateurs.find(x=>x.id===id); return c? c.nom : '—'; };
+    const compteurs = {a_venir:0, en_attente:0, termine:0, en_retard:0};
+    st.taches.forEach(t=>{ compteurs[calcStatutTache(t)]++; });
+
+    const optionsCollab = st.collaborateurs.map(c=>`<option value="${c.id}"${f.collaborateurId===c.id?' selected':''}>${echapper(c.nom)}</option>`).join('');
+    const LABELS_STATUT = {a_venir:'À venir', en_attente:'En attente', termine:'Terminé', en_retard:'En retard'};
+    const CLASSES_STATUT = {a_venir:'avenir', en_attente:'attente', termine:'termine', en_retard:'retard'};
+
+    let corpsTableau;
+    if(liste.length===0){
+      corpsTableau = `<div class="etat-vide">${svg('empty')}<div>Aucune tâche ${st.taches.length? 'ne correspond aux filtres':'pour le moment'}.</div></div>`;
+    } else {
+      corpsTableau = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th></th>
+            <th>Collaborateur</th>
+            <th>Titre</th>
+            <th>Date Début</th>
+            <th>Date Fin</th>
+            <th>Statut</th>
+            <th style="text-align:right;">Actions</th>
+          </tr></thead>
+          <tbody>
+            ${liste.map(t=>{
+              const statut = calcStatutTache(t);
+              const disabled = statut === 'a_venir';
+              return `<tr>
+                <td class="cellule-toggle ${disabled?'na':''}" ${disabled?'':`data-toggle-tache="${t.id}"`} title="${disabled? 'Date de début non atteinte' : (t.termine? 'Marquer comme non terminée':'Marquer comme terminée')}">
+                  <span class="puce-toggle ${disabled?'na':(t.termine?'vert':'rouge')}">${disabled?'—':(t.termine?'✓':'✕')}</span>
+                </td>
+                <td>${echapper(nomCollab(t.collaborateurId))}</td>
+                <td style="white-space:normal;max-width:340px;" title="${echapper(t.description)}">${echapper(t.titre)}</td>
+                <td>${formatDateFr(t.dateDebut)}</td>
+                <td>${formatDateFr(t.dateFin)}</td>
+                <td><span class="badge-statut statut-${CLASSES_STATUT[statut]}">${LABELS_STATUT[statut]}</span></td>
+                <td style="text-align:right;">
+                  <div style="display:flex;gap:6px;justify-content:flex-end;">
+                    <button class="btn-icone" data-editer-tache="${t.id}" title="Modifier">${svg('edit')}</button>
+                    <button class="btn-icone danger" data-supprimer-tache="${t.id}" title="Supprimer">${svg('delete')}</button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="legende">
+        <div class="item-legende"><span class="pastille vert"></span> Terminée — cliquez sur la case pour basculer son état</div>
+        <div class="item-legende"><span class="pastille rouge"></span> Non terminée</div>
+        <div class="item-legende"><span class="pastille na"></span> À venir (date de début non atteinte, case bloquée)</div>
+      </div>`;
+    }
+
+    return `
+      <div class="panneau">
+        <div class="page-header">
+          <div class="filtres">
+            <div class="champ-filtre">
+              <label>Titre</label>
+              <input type="text" id="filtre-taches-titre" placeholder="Titre de la tâche…" value="${echapper(f.titre)}">
+            </div>
+            <div class="champ-filtre">
+              <label>Collaborateur</label>
+              <select id="filtre-taches-collab"><option value="">Tous</option>${optionsCollab}</select>
+            </div>
+            <div class="champ-filtre">
+              <label>Statut</label>
+              <select id="filtre-taches-statut">
+                <option value="">Tous</option>
+                <option value="a_venir"${f.statut==='a_venir'?' selected':''}>À venir</option>
+                <option value="en_attente"${f.statut==='en_attente'?' selected':''}>En attente</option>
+                <option value="termine"${f.statut==='termine'?' selected':''}>Terminé</option>
+                <option value="en_retard"${f.statut==='en_retard'?' selected':''}>En retard</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primaire" id="btn-nouvelle-tache">${svg('plus')} Nouvelle Tâche</button>
+        </div>
+      </div>
+      <div class="stats-mini-row">
+        <div class="stat-mini-box"><div class="label">À venir</div><div class="valeur">${compteurs.a_venir}</div></div>
+        <div class="stat-mini-box"><div class="label">En attente</div><div class="valeur">${compteurs.en_attente}</div></div>
+        <div class="stat-mini-box vert"><div class="label">Terminées</div><div class="valeur">${compteurs.termine}</div></div>
+        <div class="stat-mini-box rouge"><div class="label">En retard</div><div class="valeur">${compteurs.en_retard}</div></div>
+      </div>
+      ${corpsTableau}
+    `;
+  },
+
+  brancher(){
+    document.querySelectorAll('[data-onglet-collab]').forEach(el=>{
+      el.addEventListener('click', ()=>{ App.sousOngletCollab = el.getAttribute('data-onglet-collab'); App.render(); });
+    });
+    if(App.sousOngletCollab==='taches') this.brancherTaches();
+    else this.brancherListe();
+  },
+
+  brancherListe(){
+    const estAgent = Auth.currentUser.role === 'agent';
+    document.getElementById('btn-nouveau-collab').addEventListener('click', ()=>this.ouvrirModaleCollab(null));
+    document.getElementById('filtre-collab-q').addEventListener('input', (e)=>{ App.filtresCollab.q = e.target.value; App.render(); });
+    document.querySelectorAll('[data-toggle-actif-collab]').forEach(b=>b.addEventListener('click', ()=>{
+      const col = Store.state.collaborateurs.find(x=>x.id===b.getAttribute('data-toggle-actif-collab'));
+      if(col){ col.actif = !col.actif; Store.save(); App.render(); }
+    }));
+    document.querySelectorAll('[data-voir-collab]').forEach(b=>b.addEventListener('click', ()=>this.ouvrirFicheCollab(b.getAttribute('data-voir-collab'))));
+    document.querySelectorAll('[data-editer-collab]').forEach(b=>b.addEventListener('click', ()=>this.ouvrirModaleCollab(b.getAttribute('data-editer-collab'))));
+    document.querySelectorAll('[data-supprimer-collab]').forEach(b=>b.addEventListener('click', ()=>this.supprimerCollab(b.getAttribute('data-supprimer-collab'))));
+    // Seul le superviseur gère l'équipe (ajout/modification/suppression/activation, comptes de connexion) —
+    // un agent peut simplement consulter le trombinoscope pour information.
+    if(estAgent){
+      const btnNouveau = document.getElementById('btn-nouveau-collab');
+      if(btnNouveau) btnNouveau.style.display = 'none';
+      document.querySelectorAll('[data-toggle-actif-collab],[data-editer-collab],[data-supprimer-collab]').forEach(el=>{
+        el.disabled = true; el.style.visibility = 'hidden';
+      });
+    }
+  },
+
+  ouvrirFicheCollab(collabId){
+    const st = Store.state;
+    const col = st.collaborateurs.find(x=>x.id===collabId);
+    if(!col) return;
+    const clientsDuCollab = st.clients.filter(c=>c.collaborateur === col.nom);
+    const nbMorale = clientsDuCollab.filter(c=>regimeSocieteClient(c)==='IS').length;
+    const nbPhysique = clientsDuCollab.filter(c=>regimeSocieteClient(c)==='IRPP').length;
+    const ligne = (label, valeur) => `
+      <div class="champ-form">
+        <label>${echapper(label)}</label>
+        <div class="valeur-fiche">${valeur!==undefined && valeur!==null && valeur!==''? echapper(valeur) : '<span class="valeur-fiche-vide">—</span>'}</div>
+      </div>`;
+
+    fermerOverlay();
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="modale modale-petite">
+        <div class="modale-entete">
+          <h2>Fiche collaborateur</h2>
+          <button class="modale-fermer" data-fermer>${svg('close')}</button>
+        </div>
+        <div class="modale-corps">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+            ${col.photo? `<img class="avatar-cercle avatar-cercle-lg" src="${col.photo}" alt="">` : `<div class="avatar-cercle avatar-cercle-lg avatar-initiales">${echapper(initiales(col.nom))}</div>`}
+            <div>
+              <div style="font-size:16.5px;font-weight:700;">${echapper(col.nom)}</div>
+              <div style="margin-top:4px;display:flex;gap:8px;align-items:center;">
+                <span class="badge-poste badge-poste-${col.poste==='Superviseur'?'superviseur':'agent'}">${echapper(col.poste)}</span>
+                <span class="badge-neutre">${col.actif? 'Actif':'Inactif'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="grille-form">
+            ${ligne('Numéro Téléphone', col.telephone)}
+            ${ligne('Adresse mail', col.email)}
+          </div>
+          <div class="stats-mini-row" style="margin-top:18px;margin-bottom:0;">
+            <div class="stat-mini-box"><div class="label">Clients attachés</div><div class="valeur">${clientsDuCollab.length}</div></div>
+            <div class="stat-mini-box"><div class="label">Personne Morale</div><div class="valeur">${nbMorale}</div></div>
+            <div class="stat-mini-box"><div class="label">Personne Physique</div><div class="valeur">${nbPhysique}</div></div>
+          </div>
+        </div>
+        <div class="modale-pied">
+          <button class="btn btn-secondaire" data-fermer>Fermer</button>
+          <button class="btn btn-primaire" id="btn-fiche-collab-modifier">${svg('edit')} Modifier</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+    ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+    ov.querySelector('#btn-fiche-collab-modifier').addEventListener('click', ()=>{ fermerOverlay(); this.ouvrirModaleCollab(collabId); });
+  },
+
+  ouvrirModaleCollab(collabId){
+    const col = collabId ? Store.state.collaborateurs.find(x=>x.id===collabId) : null;
+
+    fermerOverlay();
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="modale modale-petite">
+        <div class="modale-entete">
+          <h2>${col? 'Modifier le collaborateur' : 'Nouveau collaborateur'}</h2>
+          <button class="modale-fermer" data-fermer>${svg('close')}</button>
+        </div>
+        <div class="modale-corps">
+          <form id="form-collab">
+            <div class="grille-form">
+              <div class="champ-form pleine-largeur">
+                <label>Photo du collaborateur</label>
+                <div class="zone-photo">
+                  <div class="zone-photo-apercu" id="collab-photo-apercu">
+                    ${col&&col.photo? `<img src="${col.photo}" alt="">` : svg('camera')}
+                  </div>
+                  <div class="zone-photo-actions">
+                    <input type="file" id="collab-photo-input" accept="image/*">
+                    ${col&&col.photo? `<button type="button" class="btn btn-secondaire btn-petit" id="btn-suppr-photo">Retirer la photo</button>`:''}
+                  </div>
+                </div>
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Nom et Prénom <span class="req">*</span></label>
+                <input type="text" name="nom" required value="${echapper(col&&col.nom)}">
+              </div>
+              <div class="champ-form">
+                <label>Numéro Téléphone</label>
+                <input type="text" name="telephone" value="${echapper(col&&col.telephone)}">
+              </div>
+              <div class="champ-form">
+                <label>Adresse mail</label>
+                <input type="email" name="email" value="${echapper(col&&col.email)}">
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Poste</label>
+                <select name="poste">
+                  <option value="Agent"${!col||col.poste==='Agent'?' selected':''}>Agent</option>
+                  <option value="Superviseur"${col&&col.poste==='Superviseur'?' selected':''}>Superviseur</option>
+                </select>
+              </div>
+              ${(col && Auth.currentUser.role==='superviseur') ? `
+              <div class="champ-form pleine-largeur champ-compte-agent">
+                <h4>Accès à l'application</h4>
+                ${col.aCompte ? `
+                  <p style="font-size:12.5px;color:#334155;margin:0 0 10px;">Ce collaborateur peut déjà se connecter avec l'identifiant <b>${echapper(col.identifiant)}</b>.</p>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondaire btn-petit" id="btn-reinit-mdp">Réinitialiser le mot de passe</button>
+                    ${col.id!==Auth.currentUser.collaborateurId ? `<button type="button" class="btn btn-secondaire btn-petit" id="btn-retirer-compte">Retirer l'accès</button>` : ''}
+                  </div>
+                  <div id="zone-nouveau-mdp" style="display:none;margin-top:10px;">
+                    <label>Nouveau mot de passe (6 caractères min.)</label>
+                    <input type="password" id="collab-nouveau-mdp" minlength="6">
+                  </div>
+                ` : `
+                  <p style="font-size:12.5px;color:#334155;margin:0 0 10px;">Donnez-lui un identifiant et un mot de passe pour qu'il puisse se connecter lui-même.</p>
+                  <label>Identifiant (email de connexion)</label>
+                  <input type="email" id="collab-compte-email" style="margin-bottom:9px;">
+                  <label>Mot de passe (6 caractères min.)</label>
+                  <input type="password" id="collab-compte-mdp" minlength="6">
+                `}
+              </div>` : ''}
+            </div>
+          </form>
+        </div>
+        <div class="modale-pied">
+          <button class="btn btn-secondaire" data-fermer>Annuler</button>
+          <button class="btn btn-primaire" id="btn-enregistrer-collab">${col?'Enregistrer':'Ajouter le collaborateur'}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+    ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+
+    let photoActuelle = col && col.photo ? col.photo : '';
+    ov.querySelector('#collab-photo-input').addEventListener('change', (e)=>{
+      const fichier = e.target.files[0];
+      if(!fichier) return;
+      const lecteur = new FileReader();
+      lecteur.onload = (ev)=>{
+        photoActuelle = ev.target.result;
+        ov.querySelector('#collab-photo-apercu').innerHTML = `<img src="${photoActuelle}" alt="">`;
+      };
+      lecteur.readAsDataURL(fichier);
+    });
+    const btnSupprPhoto = ov.querySelector('#btn-suppr-photo');
+    if(btnSupprPhoto){
+      btnSupprPhoto.addEventListener('click', ()=>{
+        photoActuelle = '';
+        ov.querySelector('#collab-photo-apercu').innerHTML = svg('camera');
+      });
+    }
+    const btnReinit = ov.querySelector('#btn-reinit-mdp');
+    if(btnReinit){
+      btnReinit.addEventListener('click', ()=>{
+        document.getElementById('zone-nouveau-mdp').style.display = 'block';
+        btnReinit.style.display = 'none';
+      });
+    }
+    const btnRetirerCompte = ov.querySelector('#btn-retirer-compte');
+    if(btnRetirerCompte){
+      btnRetirerCompte.addEventListener('click', ()=>{
+        ouvrirConfirmation({
+          titre:"Retirer l'accès",
+          message:`Voulez-vous vraiment retirer l'accès à l'application de « ${col.nom} » ? Il ne pourra plus se connecter.`,
+          libelleBouton:"Retirer l'accès",
+          danger:true,
+          onConfirmer: async ()=>{
+            try{
+              const res = await fetch(`/api/collaborateurs/${col.id}/compte`, { method:'DELETE', credentials:'same-origin' });
+              if(!res.ok) throw new Error();
+              toast('Accès retiré.', 'succes');
+              fermerOverlay();
+              await Store.chargerDepuisServeur();
+              App.render();
+            }catch(e){ toast("Erreur lors du retrait de l'accès.", 'erreur'); }
+          }
+        });
+      });
+    }
+
+    ov.querySelector('#btn-enregistrer-collab').addEventListener('click', async ()=>{
+      const form = document.getElementById('form-collab');
+      if(!form.reportValidity()) return;
+      const fd = new FormData(form);
+      const obj = {};
+      fd.forEach((v,k)=>obj[k]=v.trim());
+      obj.photo = photoActuelle;
+
+      let collabId = col && col.id;
+      if(col){
+        const ancienNom = col.nom;
+        Object.assign(col, obj);
+        if(ancienNom !== col.nom){
+          // conserver le lien avec les clients déjà rattachés à ce collaborateur
+          Store.state.clients.forEach(c=>{ if(c.collaborateur === ancienNom) c.collaborateur = col.nom; });
+        }
+        toast('Collaborateur modifié.', 'succes');
+      } else {
+        obj.id = genererId();
+        obj.actif = true;
+        collabId = obj.id;
+        Store.state.collaborateurs.push(obj);
+        toast('Collaborateur ajouté.', 'succes');
+      }
+      await Store._enregistrerMaintenant();
+
+      // Création ou réinitialisation d'un accès à l'application (superviseur uniquement)
+      const champEmailNouveau = document.getElementById('collab-compte-email');
+      const champMdpNouveau = document.getElementById('collab-compte-mdp');
+      const champMdpReinit = document.getElementById('collab-nouveau-mdp');
+      try{
+        if(champEmailNouveau && champMdpNouveau && champEmailNouveau.value.trim() && champMdpNouveau.value){
+          const res = await fetch(`/api/collaborateurs/${collabId}/compte`, {
+            method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ email: champEmailNouveau.value.trim(), motDePasse: champMdpNouveau.value })
+          });
+          const data = await res.json().catch(()=>({}));
+          if(!res.ok) toast(data.error || "Erreur lors de la création de l'accès.", 'erreur');
+          else toast("Accès à l'application créé.", 'succes');
+        } else if(champMdpReinit && champMdpReinit.value && col && col.identifiant){
+          const res = await fetch(`/api/collaborateurs/${collabId}/compte`, {
+            method:'POST', credentials:'same-origin', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ email: col.identifiant, motDePasse: champMdpReinit.value })
+          });
+          const data = await res.json().catch(()=>({}));
+          if(!res.ok) toast(data.error || 'Erreur lors de la réinitialisation.', 'erreur');
+          else toast('Mot de passe réinitialisé.', 'succes');
+        }
+      }catch(e){ toast('Erreur réseau lors de la gestion du compte.', 'erreur'); }
+
+      fermerOverlay();
+      await Store.chargerDepuisServeur();
+      App.render();
+    });
+  },
+
+  supprimerCollab(collabId){
+    const st = Store.state;
+    const col = st.collaborateurs.find(x=>x.id===collabId);
+    if(!col) return;
+    const nbClients = st.clients.filter(c=>c.collaborateur===col.nom).length;
+    const nbTaches = st.taches.filter(t=>t.collaborateurId===collabId).length;
+    let message = `Voulez-vous vraiment supprimer « ${col.nom} » ?`;
+    if(nbClients) message += ` ${nbClients} client(s) lui sont actuellement attaché(s) et resteront simplement sans collaborateur assigné.`;
+    if(nbTaches) message += ` ${nbTaches} tâche(s) qui lui sont assignées seront également supprimées.`;
+    ouvrirConfirmation({
+      titre:'Supprimer le collaborateur',
+      message,
+      libelleBouton:'Supprimer',
+      danger:true,
+      onConfirmer:()=>{
+        st.clients.forEach(c=>{ if(c.collaborateur===col.nom){ c.collaborateur=''; c.collaborateurId=''; } });
+        st.taches = st.taches.filter(t=>t.collaborateurId!==collabId);
+        st.collaborateurs = st.collaborateurs.filter(x=>x.id!==collabId);
+        Store.save();
+        toast('Collaborateur supprimé.', 'succes');
+        App.render();
+      }
+    });
+  },
+
+  brancherTaches(){
+    document.getElementById('btn-nouvelle-tache').addEventListener('click', ()=>this.ouvrirModaleTache(null));
+    document.getElementById('filtre-taches-titre').addEventListener('input', (e)=>{ App.filtresTaches.titre = e.target.value; App.render(); });
+    document.getElementById('filtre-taches-collab').addEventListener('change', (e)=>{ App.filtresTaches.collaborateurId = e.target.value; App.render(); });
+    document.getElementById('filtre-taches-statut').addEventListener('change', (e)=>{ App.filtresTaches.statut = e.target.value; App.render(); });
+    document.querySelectorAll('[data-toggle-tache]').forEach(td=>{
+      td.addEventListener('click', ()=>{
+        const t = Store.state.taches.find(x=>x.id===td.getAttribute('data-toggle-tache'));
+        if(!t) return;
+        t.termine = !t.termine;
+        Store.save();
+        App.render();
+      });
+    });
+    document.querySelectorAll('[data-editer-tache]').forEach(b=>b.addEventListener('click', ()=>this.ouvrirModaleTache(b.getAttribute('data-editer-tache'))));
+    document.querySelectorAll('[data-supprimer-tache]').forEach(b=>b.addEventListener('click', ()=>this.supprimerTache(b.getAttribute('data-supprimer-tache'))));
+  },
+
+  ouvrirModaleTache(tacheId){
+    const st = Store.state;
+    const t = tacheId ? st.taches.find(x=>x.id===tacheId) : null;
+    if(st.collaborateurs.length===0){
+      toast('Ajoutez d\'abord au moins un collaborateur.', 'erreur');
+      return;
+    }
+    const optionsCollab = st.collaborateurs.map(c=>`<option value="${c.id}"${t&&t.collaborateurId===c.id?' selected':''}>${echapper(c.nom)}</option>`).join('');
+    const dureeInit = t ? t.dureeJours : 1;
+    const debutInit = t ? t.dateDebut : todayIso();
+    const finInit = t ? t.dateFin : addDaysIso(debutInit, dureeInit-1);
+
+    fermerOverlay();
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="modale modale-petite">
+        <div class="modale-entete">
+          <h2>${t? 'Modifier la tâche' : 'Nouvelle tâche'}</h2>
+          <button class="modale-fermer" data-fermer>${svg('close')}</button>
+        </div>
+        <div class="modale-corps">
+          <form id="form-tache">
+            <div class="grille-form">
+              <div class="champ-form pleine-largeur">
+                <label>Collaborateur <span class="req">*</span></label>
+                <select name="collaborateurId" required>${optionsCollab}</select>
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Titre de la tâche <span class="req">*</span></label>
+                <input type="text" name="titre" required value="${echapper(t&&t.titre)}">
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Description de la tâche <span class="req">*</span></label>
+                <textarea name="description" rows="3" required>${echapper(t&&t.description)}</textarea>
+              </div>
+              <div class="champ-form">
+                <label>Durée (en jours) <span class="req">*</span></label>
+                <input type="number" id="tache-duree" name="dureeJours" min="1" step="1" required value="${dureeInit}">
+              </div>
+              <div class="champ-form">
+                <label>Date Début <span class="req">*</span></label>
+                <input type="date" id="tache-debut" name="dateDebut" required value="${debutInit}">
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Date Fin (calculée automatiquement)</label>
+                <input type="text" id="tache-fin-affichage" value="${formatDateFr(finInit)}" disabled>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modale-pied">
+          <button class="btn btn-secondaire" data-fermer>Annuler</button>
+          <button class="btn btn-primaire" id="btn-enregistrer-tache">${t?'Enregistrer':'Ajouter la tâche'}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+    ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+
+    const majDateFin = ()=>{
+      const duree = Math.max(1, parseInt(ov.querySelector('#tache-duree').value,10) || 1);
+      const debut = ov.querySelector('#tache-debut').value || todayIso();
+      ov.querySelector('#tache-fin-affichage').value = formatDateFr(addDaysIso(debut, duree-1));
+    };
+    ov.querySelector('#tache-duree').addEventListener('input', majDateFin);
+    ov.querySelector('#tache-debut').addEventListener('input', majDateFin);
+
+    ov.querySelector('#btn-enregistrer-tache').addEventListener('click', ()=>{
+      const form = document.getElementById('form-tache');
+      if(!form.reportValidity()) return;
+      const fd = new FormData(form);
+      const duree = Math.max(1, parseInt(fd.get('dureeJours'),10) || 1);
+      const debut = fd.get('dateDebut');
+      const obj = {
+        collaborateurId: fd.get('collaborateurId'),
+        titre: fd.get('titre').trim(),
+        description: fd.get('description').trim(),
+        dureeJours: duree,
+        dateDebut: debut,
+        dateFin: addDaysIso(debut, duree-1)
+      };
+      if(t){
+        Object.assign(t, obj);
+        toast('Tâche modifiée.', 'succes');
+      } else {
+        obj.id = genererId();
+        obj.termine = false;
+        st.taches.push(obj);
+        toast('Tâche ajoutée.', 'succes');
+      }
+      Store.save();
+      fermerOverlay();
+      App.render();
+    });
+  },
+
+  supprimerTache(tacheId){
+    const st = Store.state;
+    ouvrirConfirmation({
+      titre:'Supprimer la tâche',
+      message:'Voulez-vous vraiment supprimer cette tâche ? Cette action est irréversible.',
+      libelleBouton:'Supprimer',
+      danger:true,
+      onConfirmer:()=>{
+        st.taches = st.taches.filter(x=>x.id!==tacheId);
+        Store.save();
+        toast('Tâche supprimée.', 'succes');
+        App.render();
+      }
+    });
+  }
+};
+
+function calcStatutTache(t){
+  const today = todayIso();
+  if(today < t.dateDebut) return 'a_venir';
+  if(t.termine) return 'termine';
+  if(today > t.dateFin) return 'en_retard';
+  return 'en_attente';
+}
+
+/* =========================================================
+   MODULE — NOTES
+   ========================================================= */
+const Notes = {
+  render(){
+    const st = Store.state;
+    const f = App.filtresNotes;
+
+    let liste = st.notes.map(n => Object.assign({}, n, { client: st.clients.find(c=>c.id===n.clientId) || null }));
+    if(f.clientId) liste = liste.filter(n => n.clientId === f.clientId);
+    if(f.collaborateur) liste = liste.filter(n => n.client && n.client.collaborateur === f.collaborateur);
+    liste.sort((a,b)=> normaliser(a.client?a.client.raisonSociale:'').localeCompare(normaliser(b.client?b.client.raisonSociale:'')));
+
+    const optionsClients = st.clients.slice().sort((a,b)=> normaliser(a.raisonSociale).localeCompare(normaliser(b.raisonSociale)))
+      .map(c=>`<option value="${c.id}"${f.clientId===c.id?' selected':''}>${echapper(c.raisonSociale)}</option>`).join('');
+    const optionsCollab = st.collaborateurs.map(c=>`<option value="${echapper(c.nom)}"${f.collaborateur===c.nom?' selected':''}>${echapper(c.nom)}</option>`).join('');
+
+    const collabDeClient = (client) => client && client.collaborateur ? st.collaborateurs.find(c=>c.nom===client.collaborateur) : null;
+
+    let corpsTableau;
+    if(liste.length===0){
+      corpsTableau = `<div class="etat-vide">${svg('empty')}<div>Aucune note ${st.notes.length? 'ne correspond aux filtres':'pour le moment'}.</div></div>`;
+    } else {
+      corpsTableau = `
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Nom Client</th>
+            <th>Collaborateur</th>
+            <th style="text-align:right;">Actions</th>
+          </tr></thead>
+          <tbody>
+            ${liste.map(n=>{
+              const nomClient = n.client ? n.client.raisonSociale : '(client supprimé)';
+              const texte = (n.texte||'').trim();
+              const apercu = texte.slice(0,90);
+              const collab = collabDeClient(n.client);
+              return `<tr>
+                <td class="nom-client-cell" title="${echapper(texte)}">
+                  <b>${echapper(nomClient)}</b>
+                  ${apercu? `<span>${echapper(apercu)}${texte.length>90?'…':''}</span>`:''}
+                </td>
+                <td>${collab? `<span class="badge-poste badge-poste-${collab.poste==='Superviseur'?'superviseur':'agent'}">${echapper(collab.nom)} · ${echapper(collab.poste)}</span>` : (n.client&&n.client.collaborateur? echapper(n.client.collaborateur) : '—')}</td>
+                <td style="text-align:right;">
+                  <div style="display:flex;gap:6px;justify-content:flex-end;">
+                    <button class="btn-icone" data-editer-note="${n.id}" title="Modifier">${svg('edit')}</button>
+                    <button class="btn-icone danger" data-supprimer-note="${n.id}" title="Supprimer">${svg('delete')}</button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }
+
+    return `
+      <div class="page-header-titre">
+        <h1 class="titre-avec-icone">
+          <span class="icone-titre">${svg('notes')}</span>
+          <span>Notes</span>
+          <span class="compteur-titre"><span class="point"></span>${liste.length} Note${liste.length>1?'s':''}</span>
+        </h1>
+        <p class="sous-titre">Notes libres rattachées aux clients du cabinet.</p>
+      </div>
+
+      <div class="panneau">
+        <div class="barre-actions-clients">
+          <div class="filtres">
+            <div class="champ-filtre">
+              <label>Client</label>
+              <select id="filtre-notes-client"><option value="">Tous</option>${optionsClients}</select>
+            </div>
+            <div class="champ-filtre">
+              <label>Collaborateur</label>
+              <select id="filtre-notes-collab"><option value="">Tous</option>${optionsCollab}</select>
+            </div>
+          </div>
+          <button class="btn btn-primaire" id="btn-nouvelle-note">${svg('plus')} Nouvelle Note</button>
+        </div>
+      </div>
+
+      ${corpsTableau}
+    `;
+  },
+
+  brancher(){
+    document.getElementById('btn-nouvelle-note').addEventListener('click', ()=>this.ouvrirModale(null));
+    document.getElementById('filtre-notes-client').addEventListener('change', (e)=>{ App.filtresNotes.clientId = e.target.value; App.render(); });
+    document.getElementById('filtre-notes-collab').addEventListener('change', (e)=>{ App.filtresNotes.collaborateur = e.target.value; App.render(); });
+    document.querySelectorAll('[data-editer-note]').forEach(b=>b.addEventListener('click', ()=>this.ouvrirModale(b.getAttribute('data-editer-note'))));
+    document.querySelectorAll('[data-supprimer-note]').forEach(b=>b.addEventListener('click', ()=>this.supprimer(b.getAttribute('data-supprimer-note'))));
+  },
+
+  ouvrirModale(noteId){
+    const st = Store.state;
+    const n = noteId ? st.notes.find(x=>x.id===noteId) : null;
+    if(st.clients.length===0){
+      toast('Ajoutez d\'abord au moins un client.', 'erreur');
+      return;
+    }
+    const optionsClients = st.clients.slice().sort((a,b)=> normaliser(a.raisonSociale).localeCompare(normaliser(b.raisonSociale)))
+      .map(c=>`<option value="${c.id}"${n&&n.clientId===c.id?' selected':''}>${echapper(c.raisonSociale)}</option>`).join('');
+
+    fermerOverlay();
+    const ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.innerHTML = `
+      <div class="modale modale-petite">
+        <div class="modale-entete">
+          <h2>${n? 'Modifier la note' : 'Nouvelle note'}</h2>
+          <button class="modale-fermer" data-fermer>${svg('close')}</button>
+        </div>
+        <div class="modale-corps">
+          <form id="form-note">
+            <div class="grille-form">
+              <div class="champ-form pleine-largeur">
+                <label>Client <span class="req">*</span></label>
+                <select name="clientId" required>${optionsClients}</select>
+              </div>
+              <div class="champ-form pleine-largeur">
+                <label>Note <span class="req">*</span></label>
+                <textarea name="texte" rows="5" required>${echapper(n&&n.texte)}</textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modale-pied">
+          <button class="btn btn-secondaire" data-fermer>Annuler</button>
+          <button class="btn btn-primaire" id="btn-enregistrer-note">${n?'Enregistrer':'Ajouter la note'}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e)=>{ if(e.target===ov) fermerOverlay(); });
+    ov.querySelectorAll('[data-fermer]').forEach(b=>b.addEventListener('click', fermerOverlay));
+
+    ov.querySelector('#btn-enregistrer-note').addEventListener('click', ()=>{
+      const form = document.getElementById('form-note');
+      if(!form.reportValidity()) return;
+      const fd = new FormData(form);
+      const obj = {
+        clientId: fd.get('clientId'),
+        texte: fd.get('texte').trim()
+      };
+      if(n){
+        Object.assign(n, obj);
+        toast('Note modifiée.', 'succes');
+      } else {
+        obj.id = genererId();
+        st.notes.push(obj);
+        toast('Note ajoutée.', 'succes');
+      }
+      Store.save();
+      fermerOverlay();
+      App.render();
+    });
+  },
+
+  supprimer(noteId){
+    const st = Store.state;
+    ouvrirConfirmation({
+      titre:'Supprimer la note',
+      message:'Voulez-vous vraiment supprimer cette note ? Cette action est irréversible.',
+      libelleBouton:'Supprimer',
+      danger:true,
+      onConfirmer:()=>{
+        st.notes = st.notes.filter(x=>x.id!==noteId);
+        Store.save();
+        toast('Note supprimée.', 'succes');
+        App.render();
+      }
+    });
+  }
+};
+
+/* =========================================================
+   PARAMETRES — listes configurables + export/import
+   ========================================================= */
+const Parametres = {
+  render(){
+    const p = Store.state.parametres;
+    return `
+      <div class="page-header-titre">
+        <h1 class="titre-avec-icone">
+          <span class="icone-titre">${svg('parametres')}</span>
+          <span>Paramètres</span>
+        </h1>
+        <p class="sous-titre">Personnalisez les listes utilisées dans les fiches client (Forme Juridique, Type Société, Type Déclaration). La gestion des collaborateurs se fait désormais depuis le module Collaborateurs.</p>
+      </div>
+
+      <div class="grille-parametres">
+        <div class="carte-parametre">
+          <h3>Formes Juridiques</h3>
+          <div class="liste-tags" id="liste-formes">
+            ${p.formesJuridiques.map((v,i)=>`<span class="tag">${echapper(v)}<button data-suppr-forme="${i}">${svg('close')}</button></span>`).join('') || '<span style="color:#94a3b8;font-size:12.5px;">Aucune valeur</span>'}
+          </div>
+          <div class="form-ajout-tag">
+            <input type="text" id="ajout-forme" placeholder="Ex : SARL">
+            <button class="btn btn-secondaire btn-petit" id="btn-ajout-forme">Ajouter</button>
+          </div>
+        </div>
+
+        <div class="carte-parametre">
+          <h3>Type Société <span style="font-weight:400;color:#94a3b8;font-size:11.5px;">(régime IS / IRPP)</span></h3>
+          <div class="liste-tags" id="liste-types-societe">
+            ${p.typesSociete.map((v,i)=>`<span class="tag">${echapper(v.nom)} <select data-regime-idx="${i}">
+                <option value="IS"${v.regime==='IS'?' selected':''}>IS</option>
+                <option value="IRPP"${v.regime==='IRPP'?' selected':''}>IRPP</option>
+                <option value="autre"${v.regime==='autre'?' selected':''}>Les deux</option>
+              </select><button data-suppr-type="${i}">${svg('close')}</button></span>`).join('') || '<span style="color:#94a3b8;font-size:12.5px;">Aucune valeur</span>'}
+          </div>
+          <div class="form-ajout-tag">
+            <input type="text" id="ajout-type-nom" placeholder="Ex : Personne Morale">
+            <select id="ajout-type-regime">
+              <option value="IS">IS</option>
+              <option value="IRPP">IRPP</option>
+              <option value="autre">Les deux</option>
+            </select>
+            <button class="btn btn-secondaire btn-petit" id="btn-ajout-type">Ajouter</button>
+          </div>
+        </div>
+
+        <div class="carte-parametre">
+          <h3>Types de Déclaration</h3>
+          <div class="liste-tags" id="liste-decl">
+            ${p.typesDeclaration.map((v,i)=>`<span class="tag">${echapper(v)}<button data-suppr-decl="${i}">${svg('close')}</button></span>`).join('') || '<span style="color:#94a3b8;font-size:12.5px;">Aucune valeur</span>'}
+          </div>
+          <div class="form-ajout-tag">
+            <input type="text" id="ajout-decl" placeholder="Ex : Régime Réel">
+            <button class="btn btn-secondaire btn-petit" id="btn-ajout-decl">Ajouter</button>
+          </div>
+        </div>
+
+        <div class="carte-parametre">
+          <h3>Taxes Fiscales <span style="font-weight:400;color:#94a3b8;font-size:11.5px;">(cochées sur la fiche client)</span></h3>
+          <div class="liste-tags" id="liste-taxes">
+            ${p.taxesFiscales.map((v,i)=>`<span class="tag">${echapper(v)}<button data-suppr-taxe="${i}">${svg('close')}</button></span>`).join('') || '<span style="color:#94a3b8;font-size:12.5px;">Aucune valeur</span>'}
+          </div>
+          <div class="form-ajout-tag">
+            <input type="text" id="ajout-taxe" placeholder="Ex : TVA">
+            <button class="btn btn-secondaire btn-petit" id="btn-ajout-taxe">Ajouter</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panneau" style="margin-top:20px;">
+        <h3 style="margin:0 0 6px;font-size:14px;">Sauvegarde des données</h3>
+        <p style="color:#64748b;font-size:12.5px;margin:0 0 12px;">Les données sont enregistrées automatiquement dans ce navigateur. Utilisez l'export pour en garder une copie ou les transférer vers un autre poste.</p>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-secondaire" id="btn-export-2">${svg('export')} Exporter (JSON)</button>
+          <button class="btn btn-secondaire" id="btn-import-2">${svg('import')} Importer (JSON)</button>
+        </div>
+      </div>
+    `;
+  },
+
+  brancher(){
+    const p = Store.state.parametres;
+    const rerender = ()=>{ Store.save(); App.render(); };
+
+    document.getElementById('btn-ajout-forme').addEventListener('click', ()=>{
+      const el = document.getElementById('ajout-forme');
+      if(el.value.trim()){ p.formesJuridiques.push(el.value.trim()); rerender(); }
+    });
+    document.querySelectorAll('[data-suppr-forme]').forEach(b=>b.addEventListener('click', ()=>{
+      p.formesJuridiques.splice(+b.getAttribute('data-suppr-forme'),1); rerender();
+    }));
+
+    document.getElementById('btn-ajout-type').addEventListener('click', ()=>{
+      const nomEl = document.getElementById('ajout-type-nom');
+      const regEl = document.getElementById('ajout-type-regime');
+      if(nomEl.value.trim()){ p.typesSociete.push({nom:nomEl.value.trim(), regime:regEl.value}); rerender(); }
+    });
+    document.querySelectorAll('[data-suppr-type]').forEach(b=>b.addEventListener('click', ()=>{
+      p.typesSociete.splice(+b.getAttribute('data-suppr-type'),1); rerender();
+    }));
+    document.querySelectorAll('[data-regime-idx]').forEach(sel=>sel.addEventListener('change', ()=>{
+      p.typesSociete[+sel.getAttribute('data-regime-idx')].regime = sel.value; rerender();
+    }));
+
+    document.getElementById('btn-ajout-decl').addEventListener('click', ()=>{
+      const el = document.getElementById('ajout-decl');
+      if(el.value.trim()){ p.typesDeclaration.push(el.value.trim()); rerender(); }
+    });
+    document.querySelectorAll('[data-suppr-decl]').forEach(b=>b.addEventListener('click', ()=>{
+      p.typesDeclaration.splice(+b.getAttribute('data-suppr-decl'),1); rerender();
+    }));
+
+    document.getElementById('btn-ajout-taxe').addEventListener('click', ()=>{
+      const el = document.getElementById('ajout-taxe');
+      if(el.value.trim()){ p.taxesFiscales.push(el.value.trim()); rerender(); }
+    });
+    document.querySelectorAll('[data-suppr-taxe]').forEach(b=>b.addEventListener('click', ()=>{
+      p.taxesFiscales.splice(+b.getAttribute('data-suppr-taxe'),1); rerender();
+    }));
+
+    document.getElementById('btn-export-2').addEventListener('click', ()=>Store.exporter());
+    document.getElementById('btn-import-2').addEventListener('click', ()=>document.getElementById('input-import').click());
+  }
+};
+
+/* =========================================================
+   AUTHENTIFICATION (inscription d'un cabinet / connexion)
+   ========================================================= */
+const Auth = {
+  currentUser: null, // { nom, role, cabinetNom, collaborateurId }
+
+  async demarrer(){
+    document.getElementById('logo-icone-connexion').innerHTML = svg('cadenas');
+    document.querySelectorAll('.onglet-auth').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        document.querySelectorAll('.onglet-auth').forEach(o=>o.classList.remove('actif'));
+        el.classList.add('actif');
+        const estInscription = el.getAttribute('data-onglet-auth')==='inscription';
+        document.getElementById('form-connexion').style.display = estInscription ? 'none' : 'flex';
+        document.getElementById('form-inscription').style.display = estInscription ? 'flex' : 'none';
+      });
+    });
+    document.getElementById('form-connexion').addEventListener('submit', (e)=>{ e.preventDefault(); this.tenterConnexion(); });
+    document.getElementById('form-inscription').addEventListener('submit', (e)=>{ e.preventDefault(); this.tenterInscription(); });
+    await this.verifierEtCharger();
+  },
+
+  async verifierEtCharger(){
+    try{
+      await Store.chargerDepuisServeur();
+      const res = await fetch('/api/moi', { credentials:'same-origin' });
+      if(!res.ok) throw new Error('NON_AUTHENTIFIE');
+      this.currentUser = await res.json();
+      this.afficherApplication();
+    }catch(e){
+      this.afficherEcranConnexion();
+    }
+  },
+
+  afficherApplication(){
+    document.getElementById('ecran-connexion').style.display = 'none';
+    document.getElementById('app-shell').classList.add('visible');
+    App.init();
+  },
+
+  afficherEcranConnexion(){
+    document.getElementById('app-shell').classList.remove('visible');
+    document.getElementById('ecran-connexion').style.display = 'flex';
+    setTimeout(()=>{
+      const champ = document.querySelector('#form-connexion:not([style*="display: none"]) input, #form-inscription:not([style*="display: none"]) input');
+      if(champ) champ.focus();
+    }, 50);
+  },
+
+  deconnecterEtAfficherEcran(){
+    fetch('/api/deconnexion', { method:'POST', credentials:'same-origin' }).catch(()=>{});
+    this.afficherEcranConnexion();
+  },
+
+  deconnecter(){
+    ouvrirConfirmation({
+      titre:'Déconnexion',
+      message:'Voulez-vous vraiment vous déconnecter ?',
+      libelleBouton:'Se déconnecter',
+      onConfirmer: async ()=>{
+        await fetch('/api/deconnexion', { method:'POST', credentials:'same-origin' }).catch(()=>{});
+        location.reload();
+      }
+    });
+  },
+
+  async tenterConnexion(){
+    const email = document.getElementById('c-email').value;
+    const motDePasse = document.getElementById('c-mdp').value;
+    const erreurEl = document.getElementById('erreur-connexion');
+    const btn = document.getElementById('btn-connexion');
+    erreurEl.textContent = ''; btn.disabled = true; btn.textContent = 'Connexion…';
+    try{
+      const res = await fetch('/api/connexion', {
+        method:'POST', credentials:'same-origin',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ email, motDePasse })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){ erreurEl.textContent = data.error || 'Connexion impossible.'; return; }
+      await this.verifierEtCharger();
+    }catch(e){
+      erreurEl.textContent = 'Impossible de contacter le serveur. Vérifiez votre connexion internet.';
+    }finally{
+      btn.disabled = false; btn.textContent = 'Se connecter';
+    }
+  },
+
+  async tenterInscription(){
+    const nomCabinet = document.getElementById('i-cabinet').value;
+    const nom = document.getElementById('i-nom').value;
+    const email = document.getElementById('i-email').value;
+    const motDePasse = document.getElementById('i-mdp').value;
+    const erreurEl = document.getElementById('erreur-inscription');
+    const btn = document.getElementById('btn-inscription');
+    erreurEl.textContent = ''; btn.disabled = true; btn.textContent = 'Création…';
+    try{
+      const res = await fetch('/api/inscription', {
+        method:'POST', credentials:'same-origin',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ nomCabinet, nom, email, motDePasse })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok){ erreurEl.textContent = data.error || 'Inscription impossible.'; return; }
+      await this.verifierEtCharger();
+    }catch(e){
+      erreurEl.textContent = 'Impossible de contacter le serveur. Vérifiez votre connexion internet.';
+    }finally{
+      btn.disabled = false; btn.textContent = 'Créer mon cabinet';
+    }
+  }
+};
+
+/* =========================================================
+   DEMARRAGE
+   ========================================================= */
+document.addEventListener('DOMContentLoaded', ()=>Auth.demarrer());
+</script>
+</body>
+</html>
